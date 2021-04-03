@@ -15,6 +15,9 @@ public class Museo extends Observable {
     private Set<Opera> catalogoOpere = new LinkedHashSet<>(); //TODO: chi crea il museo dovrà fornire il catalogo
     private List<Suggerimento> suggerimenti = new ArrayList<>();
 
+    /**
+     * <h2>Costruttori</h2>
+     */
     public Museo(){
         catalogoOpere.add(new Opera("Gioconda", "Leonardo Da Vinci", this));
         catalogoOpere.add(new Opera("Notte Stellata", "V. Van Gogh", this));
@@ -22,8 +25,15 @@ public class Museo extends Observable {
         catalogoOpere.add(new Opera("Gisadasoconda", "Leonardo asdDa Vinci", this));
     }
 
+    public Museo(Set<Opera> catalogoOpere){
+        this.catalogoOpere = catalogoOpere;
+    }
+
+
     /**
-     * Il catalogo opere è immutabile.
+     * <h2>Metodi</h2>
+     *
+     * <p>Il catalogo opere è immutabile.
      * @return il catalogo totale delle opere.
      */
     public Set<Opera> getCatalogoOpere(){
@@ -49,7 +59,7 @@ public class Museo extends Observable {
         //TODO: potrebbe essere utile observer per notificare che è stato lasciato un
         // suggerimento a l'amministratore
         setChanged();
-        notifyObservers();
+        notifyObservers(suggerimento);
     }
 
     public List<Suggerimento> getSuggerimenti(Object richiedente){
@@ -59,5 +69,24 @@ public class Museo extends Observable {
             System.out.println("Non sono un amministratore");
         return this.suggerimenti;
         //TODO: ancora da implementare
+    }
+
+    public void addOpera(Opera opera){
+        this.catalogoOpere.add(opera);
+    }
+
+    public boolean remOpera(Opera opera){
+        return this.catalogoOpere.remove(opera);
+    }
+
+    /**
+     *
+     * @param richiedente è chi richiede. Se è un Amministratore, gli ritorna il bilancio corretto, altrimenti 0.
+     * @return bilancio del museo oppure 0.
+     */
+    public int getBalance(Object richiedente){
+        if(richiedente instanceof Amministratore)
+            return bilancio;
+        return 0;
     }
 }

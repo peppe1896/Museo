@@ -9,6 +9,7 @@ public class Opera {
 
     //TODO: questo costruttore deve essere o privato o protetto.
     // Il catalogo delle opere d'arte va reso meno flessibile
+    // potrebbe essere necessario dividere il proprietario dall'utilizzatore
     public Opera(String nome, String autore, Museo museoProprietario){
         this.nome = nome;
         this.autore = autore;
