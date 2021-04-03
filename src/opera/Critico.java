@@ -1,2 +1,4 @@
-package PACKAGE_NAME;public class Critico {
+package opera;
+
+public class Critico {
 }

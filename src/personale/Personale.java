@@ -1,4 +1,6 @@
 package personale;
 
-public abstract class Personale {
+import museo.Suggeritore;
+
+public abstract class Personale implements Suggeritore {
 }

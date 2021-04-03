@@ -1,2 +1,4 @@
-package museo;public class Mostra {
+package museo;
+
+public class Mostra {
 }
