@@ -13,26 +13,22 @@ import java.util.LinkedHashSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSuggerimento {
-    private static Museo museo;
-    private static Amministratore amministratore;
-    private static Opera opera;
-    private static Visitatore visitatore;
-    private static LinkedHashSet<Opera> opereBase;
-    private static Suggerimento suggerimento;
-
-    @BeforeAll
-    public static void initializeOpereBase(){
-        opereBase = new LinkedHashSet<>();
-        museo = new Museo();
-        opereBase.add(new Opera("Gioconda", "Leonardo Da Vinci", museo));
-        opereBase.add(new Opera("Notte Stellata", "V. Van Gogh", museo));
-        opereBase.add(new Opera("Giocasdonda", "Leonardsadso Da Vinci", museo));
-        opereBase.add(new Opera("Gisadasoconda", "Leonardo asdDa Vinci", museo));
-    }
+    private Museo museo;
+    private Amministratore amministratore;
+    private Opera opera;
+    private Visitatore visitatore;
+    private LinkedHashSet<Opera> opereBase;
+    private Suggerimento suggerimento;
 
     @BeforeEach
     public void initializeOperaVisitAmmin(){
-        opera = new Opera("Test", "Giuseppe", museo);
+        opereBase = new LinkedHashSet<>();
+        museo = new Museo();
+        opereBase.add(new Opera("Gioconda", "Leonardo Da Vinci", museo, 50));
+        opereBase.add(new Opera("Notte Stellata", "V. Van Gogh", museo, 50));
+        opereBase.add(new Opera("Giocasdonda", "Leonardsadso Da Vinci", museo, 50));
+        opereBase.add(new Opera("Gisadasoconda", "Leonardo asdDa Vinci", museo, 50));
+        opera = new Opera("Test", "Giuseppe", museo, 0);
         visitatore = new Visitatore(100);
         museo.addOpera(opera);
         suggerimento = new Suggerimento(opera, visitatore);
@@ -79,15 +75,6 @@ public class TestSuggerimento {
         /*
         Dopo che chiamo questo metodo mi aspetto che l'amministratore sia a conoscenza di questo suggerimento
          */
-        System.out.println("");
         assertTrue(hashMapAmministratore.get(suggerimento.getSuggerimento()) == 1);
-    }
-
-    @AfterEach
-    public void resetPartial(){
-        museo.remOpera(opera);
-        opera = null;
-        suggerimento = null;
-        amministratore = null;
     }
 }
