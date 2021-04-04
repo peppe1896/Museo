@@ -10,5 +10,7 @@ public class Impiegato extends Personale{
     public void svolgiIncaricoAssegnato(){
         incaricoImpiegato.svolgiIncarico();
         incaricoImpiegato.setDone();
+        //TODO forse dovrebbe essere qui quello che resetta l'incaricoImpiegato a null
+        // in questo momento è l'organizzatore a resettare l'incarico.
     }
 }

@@ -1,9 +1,10 @@
 package museo;
 
+import museo.sale.SalaFisica;
+import museo.sale.SalaVirtuale;
 import museo.ticket.Biglietto;
 import museo.ticket.TicketMostraFisica;
 import museo.ticket.TicketMostraVirtuale;
-import museo.ticket.TicketMuseo;
 import opera.GestoreOpere;
 import opera.Opera;
 import personale.*;
@@ -22,6 +23,9 @@ public class Museo extends Observable {
     private List<Suggerimento> suggerimenti = new ArrayList<>();
     private List<Personale> personale = new ArrayList<>();
     private GestoreOpere gestoreOpere;
+    private List<Sala> sale = new ArrayList<>();
+    private ArrayList<Mostra> mostre = new ArrayList<>();
+
     /**
      * <h2>Costruttori</h2>
      */
@@ -41,6 +45,21 @@ public class Museo extends Observable {
         ticketMuseoVenduti.put("Biglietto Base", new ArrayList<>());
         ticketMuseoVenduti.put("Ticket Mostra", new ArrayList<>());
         ticketMuseoVenduti.put("Ticket Virtuale", new ArrayList<>());
+
+        sale = List.of(new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5)
+        );
+
     }
 
     public Museo(Set<Opera> catalogoOpere){
@@ -65,13 +84,22 @@ public class Museo extends Observable {
         boolean returns = false;
         if(visitatore.paga(costoBiglietto)) {
             ticketMuseoVenduti.get("Biglietto Base").add(new Biglietto(visitatore));
-            ticketMuseoVenduti.get("Ticket Mostra").add(new TicketMostraFisica(visitatore));
-            ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraVirtuale(visitatore));
             returns = true;
         }
         listaVisitatori.add(visitatore);
         return returns;
         //TODO: implementare richiesta di registrazione se nuovo utente
+    }
+
+    public boolean vendiTicketMostra(Visitatore visitatore, Mostra mostra){
+        if(visitatore.paga(mostra.getCostoBiglietto())){
+            if(mostra.isVirtual())
+                ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraFisica(visitatore));
+            else
+                ticketMuseoVenduti.get("Ticket Mostra").add(new TicketMostraFisica(visitatore));
+            return true;
+        }
+        return false;
     }
 
     public void registraSuggerimento(Suggerimento suggerimento){
@@ -113,9 +141,11 @@ public class Museo extends Observable {
     }
 
     public void addBilancio(Object richiedente, int incasso){
-        this.bilancio += incasso;
-        setChanged();
-        notifyObservers();
+        if(richiedente instanceof Organizzatore || richiedente instanceof Amministratore) {
+            this.bilancio += incasso;
+            setChanged();
+            notifyObservers();
+        }
     }
 
     public void prelevaBilancio(Object richiedente, int prelievo){
@@ -126,9 +156,9 @@ public class Museo extends Observable {
         }
     }
 
-    /** Ottieni una lista degli organizzatori.
-     * @param onlyFree Se true, ritorna solo gli organizzatori che sono liberi di potere organizzare qualche mostra.
-     * @return tutti gli organizzatori, anche quelli che sono attualmente occupati.
+    /** Ottieni una lista degli organizzatori / impiegati / Sale.
+     * @param onlyFree Se true, ritorna solo * che sono liberi.
+     * @return List di Organizzatori | Impiegati | Sale
      */
     public List<Personale> getOrganizzatori(boolean onlyFree){
         ArrayList<Personale> organizzatori = new ArrayList<>();
@@ -158,6 +188,21 @@ public class Museo extends Observable {
         return organizzatori;
     }
 
+    public List<Sala> getSale(boolean onlyVirtual){
+        List<Sala> sale = new ArrayList<>();
+        if(onlyVirtual) {
+            for (Sala sala : this.sale)
+                if (sala instanceof SalaVirtuale)
+                    if (!sala.isBusy())
+                        sale.add(sala);
+        }
+        else{
+            for(Sala sala: this.sale)
+                if(!sala.isBusy())
+                    sale.add(sala);
+        }
+        return sale;
+    }
     /**
      *
      * @return List di tutte le opere di cui questo museo è il proprietario.
@@ -169,7 +214,16 @@ public class Museo extends Observable {
                 opere.add(opera);
         return opere;
     }
+
     public GestoreOpere getGestoreOpere(){
         return gestoreOpere;
+    }
+
+    public void addMostra(Mostra mostra){
+        this.mostre.add(mostra);
+    }
+
+    public List<Mostra> getMostre(){
+        return mostre;
     }
 }

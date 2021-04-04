@@ -13,7 +13,7 @@ public abstract class Personale implements Suggeritore {
         return busyInQualcheMostra;
     }
 
-    public void setOccupato(){
+    public void setBusy(){
         busyInQualcheMostra = true;
     }
 
@@ -29,7 +29,9 @@ public abstract class Personale implements Suggeritore {
         throw new Exception("Non si imposta un incarico a un Organizzatore");
     }
 
-    public void svolgiIncaricoAssegnato() throws Exception{
-        throw new Exception("Nessun incarico previsto per questa classe.");
+    public abstract void svolgiIncaricoAssegnato();
+
+    public int getPortafogli(){
+        return portafogli;
     }
 }

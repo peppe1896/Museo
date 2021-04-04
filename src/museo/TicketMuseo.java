@@ -1,6 +1,4 @@
-package museo.ticket;
-
-import visitatore.Visitatore;
+package museo;
 
 /**
  * Classe astratta che raccoglie i Ticket, che possono essere:

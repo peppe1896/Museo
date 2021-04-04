@@ -126,7 +126,7 @@ public class Amministratore implements Observer {
         IncaricoMostra incaricoMostra = strategy.strategyMethod(museo);
         if(incaricoMostra != null) {
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
-            museo.setBilancio(this, museo.getBilancio(this)-incaricoMostra.getBilancio());
+            museo.prelevaBilancio(this, incaricoMostra.getBilancio());
             incaricoMostra.setOrganizzatore(organizzatore);
             incarichiCreati.add(incaricoMostra);
             organizzatore.setIncaricoAttuale(incaricoMostra);

@@ -1,5 +1,6 @@
 package personale.pkgIncaricoMostra;
 
+import museo.Mostra;
 import opera.Opera;
 import personale.*;
 
@@ -25,10 +26,13 @@ public class IncaricoMostra extends Observable implements Incarico {
     private Personale organizzatore;
     private ArrayList<Personale> impiegati;
     private boolean killable = true;
+    private Mostra mostra = null;
+    public final int fondiStanziati;
 
     IncaricoMostra(int bilancioMostra){
         opereMostra = new ArrayList<>();
         bilancio = bilancioMostra;
+        fondiStanziati = bilancioMostra;
     }
 
     /**
@@ -56,7 +60,13 @@ public class IncaricoMostra extends Observable implements Incarico {
     public ArrayList<Personale> getImpiegati(){
         return impiegati;
     }
-
+    public void setMostra(Organizzatore organizzatore, Mostra mostra){
+        if(this.organizzatore == organizzatore)
+            this.mostra = mostra;
+    }
+    public Mostra getMostra(){
+        return mostra;
+    }
     /**
      * Preleva il denaro dal fondi stanziati per questa Mostra
      * @param denaroRichiesto Il denaro da prelevare
@@ -64,7 +74,7 @@ public class IncaricoMostra extends Observable implements Incarico {
     public void prelevaDenaro(Object requester, int denaroRichiesto){
         if(requester == organizzatore) {
             try {
-                if (denaroRichiesto < bilancio)
+                if (denaroRichiesto <= bilancio)
                     bilancio -= denaroRichiesto;
             } catch (Exception e) {
                 System.err.println("Non ci sono abbastanza fondi");
@@ -98,5 +108,9 @@ public class IncaricoMostra extends Observable implements Incarico {
      */
     public boolean isKillable(){
         return killable;
+    }
+
+    public Personale getOrganizzatore(){
+        return organizzatore;
     }
 }
