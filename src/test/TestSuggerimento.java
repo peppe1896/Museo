@@ -4,7 +4,7 @@ import museo.Museo;
 import museo.Suggerimento;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.strategy.Amministratore;
+import personale.pkgIncaricoMostra.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.LinkedHashMap;

@@ -1,4 +1,4 @@
-package personale.strategy;
+package personale.pkgIncaricoMostra;
 
 import museo.Museo;
 import opera.Opera;
@@ -20,7 +20,7 @@ public class OnSuggestStrategy implements Strategy {
      * @return  IncaricoMostra da dare all'amministratore, che successivamente lo da a un organizzatore.
      */
     @Override
-    public IncaricoMostra creaIncaricoMostra(Museo museo) {
+    public IncaricoMostra strategyMethod(Museo museo) {
         int numeroOpereAutoStrategy = 5;
         IncaricoMostra incarico = new IncaricoMostra(200);
         ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();

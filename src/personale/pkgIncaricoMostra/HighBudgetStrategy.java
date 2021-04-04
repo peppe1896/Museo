@@ -1,4 +1,4 @@
-package personale.strategy;
+package personale.pkgIncaricoMostra;
 
 import museo.Museo;
 import opera.GestoreOpere;
@@ -15,8 +15,10 @@ import java.util.ArrayList;
  *
  */
 public class HighBudgetStrategy implements Strategy {
-    @Override
-    public IncaricoMostra creaIncaricoMostra(Museo museo){
+
+    HighBudgetStrategy(){}
+
+    public IncaricoMostra strategyMethod(Museo museo){
         GestoreOpere gestoreOpere = museo.getGestoreOpere();
         int numeroOpereHighStrategy = 5;
         IncaricoMostra incarico = new IncaricoMostra(300);

@@ -41,6 +41,9 @@ public final class Opera {
     public Museo getProprietario(){
         return proprietario;
     }
+    public Museo getAffittuario(){
+        return museoInMostra;
+    }
     public boolean isBusy(){
         return busyInQualcheMostra;
     }

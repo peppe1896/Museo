@@ -31,5 +31,9 @@ public class TestVenditaBigliettoIngresso {
     @DisplayName("Test with Budget")
     public void testVendiBigliettoBudget(){
         assertTrue(m.vendiBigliettoMuseo(new Visitatore(100)));
+        assertTrue(m.vendiBigliettoMuseo(new Visitatore(100)));
+        assertTrue(m.vendiBigliettoMuseo(new Visitatore(100)));
+        assertTrue(m.vendiBigliettoMuseo(new Visitatore(100)));
+        assertTrue(m.vendiBigliettoMuseo(new Visitatore(100)));
     }
 }

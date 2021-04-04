@@ -4,7 +4,9 @@ import museo.Museo;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.strategy.Amministratore;
+import personale.pkgIncaricoMostra.Amministratore;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestNoleggiaOpere {
     private Museo museo;
@@ -31,6 +33,10 @@ public class TestNoleggiaOpere {
     @DisplayName("Test verifica effettiva acquisizione")
     public void testAffittoOpera(){
         museo.setBilancio(amministratore, 500);
+        assertFalse(operaDaAffittare.isBusy());
+        assertEquals(operaDaAffittare.getProprietario(), operaDaAffittare.getAffittuario());
+        gestoreOpere.affittaOperaAMuseo(operaDaAffittare, museo);
+        assertEquals(operaDaAffittare.getAffittuario(), museo);
 
     }
 }

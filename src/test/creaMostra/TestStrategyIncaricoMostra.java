@@ -1,26 +1,32 @@
 package test.creaMostra;
 
 import museo.Museo;
+import museo.Suggerimento;
+import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.strategy.Amministratore;
-import personale.strategy.IncaricoMostra;
-import personale.strategy.LowBudgetStrategy;
-import personale.strategy.ZeroBudgetStrategy;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
+import personale.pkgIncaricoMostra.Amministratore;
+import personale.pkgIncaricoMostra.IncaricoMostra;
+import personale.pkgIncaricoMostra.LowBudgetStrategy;
+import personale.pkgIncaricoMostra.ZeroBudgetStrategy;
 import visitatore.Visitatore;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestCreaIncaricoMostra {
+public class TestStrategyIncaricoMostra {
     private Museo museo;
     private Amministratore amministratore;
+    private GestoreOpere gestoreOpere;
+    private IncaricoMostra incaricoMostra;
 
     @BeforeEach
     public void setTest(){
         museo = new Museo();
         amministratore = new Amministratore(museo);
+        gestoreOpere = museo.getGestoreOpere();
     }
 
     /**
@@ -81,14 +87,26 @@ public class TestCreaIncaricoMostra {
     public void testStrategyAuto(){
         Visitatore v = new Visitatore();
         amministratore.loadSuggerimentiPerOpera(this);
-
+        Opera opera1 = gestoreOpere.getOperaNome("TestA");
+        Opera opera2 = gestoreOpere.getOperaNome("TestB");
         for(int i=0;i<5;i++)
-            //museo.registraSuggerimento(new Suggerimento(opera1,v));
+            museo.registraSuggerimento(new Suggerimento(opera1,v));
         for(int j=0;j<5;j++)
-            //museo.registraSuggerimento(new Suggerimento(opera2,v));
+            museo.registraSuggerimento(new Suggerimento(opera2,v));
         museo.setBilancio(amministratore,5000);
-        IncaricoMostra incaricoMostra = amministratore.createIncaricoMostra();
-        //assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
-        //assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
+        incaricoMostra = amministratore.createIncaricoMostra();
+        assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
+        assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
+    }
+
+    @Test
+    @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolimento")
+    public void testKillStrategy(){
+        testStrategyAuto(); // creo, tramite strategy precedente, un IncaricoMostra
+        museo.setBilancio(amministratore, 50000);
+        incaricoMostra = amministratore.createIncaricoMostra();
+        for(Opera o: incaricoMostra.getOpereMostra())
+            assertFalse(o.isBusy()); // mi aspetto che le opere che avevo affittato siano tornate di nuovo libere
+        assertFalse(incaricoMostra.isKillable()); //vuol dire che non è killabile, cioè che è già stato killato.
     }
 }

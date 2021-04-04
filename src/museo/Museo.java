@@ -1,9 +1,13 @@
 package museo;
 
+import museo.ticket.Biglietto;
+import museo.ticket.TicketMostraFisica;
+import museo.ticket.TicketMostraVirtuale;
+import museo.ticket.TicketMuseo;
 import opera.GestoreOpere;
 import opera.Opera;
 import personale.*;
-import personale.strategy.Amministratore;
+import personale.pkgIncaricoMostra.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.*;
@@ -13,8 +17,8 @@ public class Museo extends Observable {
     private int bilancio;
 
     private List<Visitatore> listaVisitatori = new ArrayList<>();
-    private List<Biglietto> bigliettiVenduti = new ArrayList<>();
-    private Set<Opera> catalogoOpere; //TODO: chi crea il museo dovrà fornire il catalogo
+    private LinkedHashMap<String, List<TicketMuseo>> ticketMuseoVenduti;
+    private Set<Opera> catalogoOpere;
     private List<Suggerimento> suggerimenti = new ArrayList<>();
     private List<Personale> personale = new ArrayList<>();
     private GestoreOpere gestoreOpere;
@@ -32,6 +36,11 @@ public class Museo extends Observable {
         personale.add(new Impiegato());
 
         personale.add(new Organizzatore(this));
+
+        ticketMuseoVenduti = new LinkedHashMap<>();
+        ticketMuseoVenduti.put("Biglietto Base", new ArrayList<>());
+        ticketMuseoVenduti.put("Ticket Mostra", new ArrayList<>());
+        ticketMuseoVenduti.put("Ticket Virtuale", new ArrayList<>());
     }
 
     public Museo(Set<Opera> catalogoOpere){
@@ -54,9 +63,12 @@ public class Museo extends Observable {
      */
     public boolean vendiBigliettoMuseo(Visitatore visitatore) {
         boolean returns = false;
-        if(visitatore.paga(costoBiglietto))
+        if(visitatore.paga(costoBiglietto)) {
+            ticketMuseoVenduti.get("Biglietto Base").add(new Biglietto(visitatore));
+            ticketMuseoVenduti.get("Ticket Mostra").add(new TicketMostraFisica(visitatore));
+            ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraVirtuale(visitatore));
             returns = true;
-
+        }
         listaVisitatori.add(visitatore);
         return returns;
         //TODO: implementare richiesta di registrazione se nuovo utente
@@ -107,9 +119,11 @@ public class Museo extends Observable {
     }
 
     public void prelevaBilancio(Object richiedente, int prelievo){
-        this.bilancio -= prelievo;
-        setChanged();
-        notifyObservers();
+        if(richiedente instanceof Amministratore) {
+            this.bilancio -= prelievo;
+            setChanged();
+            notifyObservers();
+        }
     }
 
     /** Ottieni una lista degli organizzatori.

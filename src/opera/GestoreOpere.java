@@ -7,7 +7,11 @@ public final class GestoreOpere {
     private static Set<Opera> catalogoOpere;
 
     /**
-     * Inizializza un gestore opere, che serve per lo sharing delle opere tra vari musei
+     * Inizializza un gestore opere, che serve per lo sharing delle opere tra vari musei.
+     * Il costruttore del museo crea l'unico GestoreOpere che dovrebbe esistere, e ogni volta
+     * che qualcuno deve usare qualche opera, usa il metodo del Museo getGestoreOpere() e poi
+     * usa lo stesso GestoreOpere per chiedere Opere, restituirle, affittarle e cambiare le parti
+     * dello stato dell'opera che si possono cambiare, quale l'utilizzatore e la disponibilità.
      * @param museo Serve solo per avere due diversi proprietari per diverse opere.
      */
     public GestoreOpere(Museo museo){

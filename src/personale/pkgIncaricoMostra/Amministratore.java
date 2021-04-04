@@ -1,10 +1,10 @@
-package personale.strategy;
+package personale.pkgIncaricoMostra;
 
 import museo.Museo;
 import museo.Suggerimento;
 import opera.Opera;
 import personale.Organizzatore;
-import test.creaMostra.TestCreaIncaricoMostra;
+import test.creaMostra.TestStrategyIncaricoMostra;
 
 import java.util.*;
 /**
@@ -19,8 +19,9 @@ public class Amministratore implements Observer {
     private LinkedHashMap<Opera, Integer> suggerimentiPerOpera = new LinkedHashMap<>();
     private int balanceMuseo = 0;
     private Strategy strategy;
+    private boolean killStrategy = false;
 
-    private ArrayList<IncaricoMostra> incarichiCreati = new ArrayList<>();
+    private Set<IncaricoMostra> incarichiCreati = new HashSet<>();
     private Set<Opera> accumuloRichieste = new LinkedHashSet<>();
 
     /**
@@ -58,6 +59,7 @@ public class Amministratore implements Observer {
         balanceMuseo = museo.getBilancio(this);
         checkNumSuggerimenti();
         setStrategy();
+        // TODO fare la killStrategy quando ci sono le sale occupate.
 
     }
 
@@ -67,7 +69,7 @@ public class Amministratore implements Observer {
      * Amministratore.
      */
     public void loadSuggerimentiPerOpera(Object requester){
-        if(requester instanceof TestCreaIncaricoMostra || requester instanceof Amministratore)
+        if(requester instanceof TestStrategyIncaricoMostra || requester instanceof Amministratore)
         suggerimentiPerOpera = new LinkedHashMap<>();
         for(Opera o: museo.getCatalogoOpere())
             suggerimentiPerOpera.put(o,0);
@@ -77,15 +79,21 @@ public class Amministratore implements Observer {
      * si può permettere.
      */
     private void setStrategy(){
-        if(accumuloRichieste.size() >= 2 && balanceMuseo >= 400) {
-            strategy = new OnSuggestStrategy(accumuloRichieste);
-        } else {
-            if (balanceMuseo <= 50)
-                strategy = new ZeroBudgetStrategy();
-            if (balanceMuseo <= 150 && balanceMuseo > 50)
-                strategy = new LowBudgetStrategy();
-            if (balanceMuseo > 150)
-                strategy = new HighBudgetStrategy();
+        if (killStrategy)
+            strategy = new KillMostreStrategy(incarichiCreati, this);
+        else {
+            if(accumuloRichieste.size() >= 2 && balanceMuseo >= 400) {
+                strategy = new OnSuggestStrategy(accumuloRichieste);
+                // killStrategy = true;
+            } else {
+                if (balanceMuseo <= 50)
+                    strategy = new ZeroBudgetStrategy();
+                if (balanceMuseo <= 150 && balanceMuseo > 50)
+                    strategy = new LowBudgetStrategy();
+                if (balanceMuseo > 150 && balanceMuseo < 5000)
+                    strategy = new HighBudgetStrategy();
+
+            }
         }
     }
 
@@ -109,14 +117,13 @@ public class Amministratore implements Observer {
     /**
      * Crea un IncaricoMostra usando una Strategy e stanzia il denaro previsto dalla strategia, togliendolo
      * dal budgetMostre del Museo.
-     * // TODO: deve essere possibile creare IncaricoMostra anche in modo personalizzato e fuori dalle strategie.
-     * // TODO: una buona strategia sarebbe fornire l'amministratore di un counter che aumenta ad ogni update
-     * e quando si raggiunge un certo numero lui crei un IncaricoMostra.
-     * //TODO: ancora non si prevede di poter trovare un Organizzatore occupato.
+     * // TODO: deve essere possibile creare IncaricoMostra anche in modo personalizzato fuori dalle strategie.
+     * // TODO: ancora non si prevede di poter trovare un Organizzatore occupato.
      * @return : Ai soli fini di test. Non è necessario prendere il valore di ritorno per avere questo comportamento
      */
     public IncaricoMostra createIncaricoMostra(){
-        IncaricoMostra incaricoMostra = strategy.creaIncaricoMostra(museo);
+        // strategyMethod crea un incarico a seconda della strategia, oppure distrugge una mostra
+        IncaricoMostra incaricoMostra = strategy.strategyMethod(museo);
         if(incaricoMostra != null) {
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
             museo.setBilancio(this, museo.getBilancio(this)-incaricoMostra.getBilancio());
@@ -129,5 +136,9 @@ public class Amministratore implements Observer {
 
     public Strategy getStrategy(){
         return strategy;
+    }
+
+    public Set<IncaricoMostra> getIncarichiCreati(){
+        return incarichiCreati;
     }
 }
