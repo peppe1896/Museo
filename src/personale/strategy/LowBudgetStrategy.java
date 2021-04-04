@@ -1,11 +1,11 @@
-package personale;
+package personale.strategy;
 
 import museo.Museo;
 import opera.Opera;
 
 import java.util.ArrayList;
 
-public class LowBudgetStrategy implements Strategy{
+public class LowBudgetStrategy implements Strategy {
     /**
      * Strategy che stanzia una piccola somma per creare un IncaricoMostra, usando solo le opere che sono di proprietà
      * del museo passato come parametro da parte dell'Amministratore del Museo. Questo IncaricoMostra viene passato

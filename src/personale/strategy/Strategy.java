@@ -1,6 +1,8 @@
-package personale;
+package personale.strategy;
 
 import museo.Museo;
+import personale.strategy.IncaricoMostra;
+
 public interface Strategy {
     /**
      * Crea un IncaricoMostra. In base al bilancio l'amministratore chiama una ConcreteStrategy.

@@ -1,10 +1,9 @@
 package museo;
 
+import opera.GestoreOpere;
 import opera.Opera;
-import personale.Amministratore;
-import personale.Impiegato;
-import personale.Organizzatore;
-import personale.Personale;
+import personale.*;
+import personale.strategy.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.*;
@@ -15,24 +14,16 @@ public class Museo extends Observable {
 
     private List<Visitatore> listaVisitatori = new ArrayList<>();
     private List<Biglietto> bigliettiVenduti = new ArrayList<>();
-    private Set<Opera> catalogoOpere = new LinkedHashSet<>(); //TODO: chi crea il museo dovrà fornire il catalogo
+    private Set<Opera> catalogoOpere; //TODO: chi crea il museo dovrà fornire il catalogo
     private List<Suggerimento> suggerimenti = new ArrayList<>();
     private List<Personale> personale = new ArrayList<>();
+    private GestoreOpere gestoreOpere;
     /**
      * <h2>Costruttori</h2>
      */
     public Museo(){
-        catalogoOpere.add(new Opera("La Gioconda", "Leonardo Da Vinci", this, 50));
-        catalogoOpere.add(new Opera("Notte Stellata", "V. Van Gogh", this, 50));
-        catalogoOpere.add(new Opera("La Persistenza della Memoria", "Salvador Dalì", this, 50));
-        catalogoOpere.add(new Opera("L'Urlo", "Edvard Munch", this, 50));
-        catalogoOpere.add(new Opera("La Ragazza con l'Orecchino di Perla", "Jean Vermeer", this, 50));
-        catalogoOpere.add(new Opera("L'Urlo", "Edvard Munch", this, 50));
-        catalogoOpere.add(new Opera("La Nascita di Venere", "Sandro Botticelli", null, 50));
-        catalogoOpere.add(new Opera("La Venere di Urbino", "Tiziano", null, 50));
-        catalogoOpere.add(new Opera("American Gothic", "Grant Wood", null, 50));
-        catalogoOpere.add(new Opera("Olympia", "Edouart Manet", null, 50));
-        catalogoOpere.add(new Opera("Ophelia", "John Everett Millais", null, 50));
+        gestoreOpere = new GestoreOpere(this);
+        catalogoOpere = gestoreOpere.getCatalogoOpere();
 
         personale.add(new Impiegato());
         personale.add(new Impiegato());
@@ -54,7 +45,7 @@ public class Museo extends Observable {
      * @return il catalogo totale delle opere.
      */
     public Set<Opera> getCatalogoOpere(){
-        return catalogoOpere;
+        return catalogoOpere; //Todo: sei sicuro che chi usa questo set non rischa di rovinarlo?
     }
     /**
      * Vende il biglietto per l'ingresso al museo (non alla mostra)
@@ -86,14 +77,6 @@ public class Museo extends Observable {
         //TODO: ancora da implementare
     }
 
-    public void addOperaCatalogo(Opera opera){
-        this.catalogoOpere.add(opera);
-    }
-
-    public boolean remOpera(Opera opera){
-        return this.catalogoOpere.remove(opera);
-    }
-
     /**
      * Ottieni il bilancio attuale del Museo.
      * @param richiedente è chi richiede. Se è un Amministratore, gli ritorna il bilancio corretto, altrimenti 0.
@@ -117,6 +100,18 @@ public class Museo extends Observable {
         }
     }
 
+    public void addBilancio(Object richiedente, int incasso){
+        this.bilancio += incasso;
+        setChanged();
+        notifyObservers();
+    }
+
+    public void prelevaBilancio(Object richiedente, int prelievo){
+        this.bilancio -= prelievo;
+        setChanged();
+        notifyObservers();
+    }
+
     /** Ottieni una lista degli organizzatori.
      * @param onlyFree Se true, ritorna solo gli organizzatori che sono liberi di potere organizzare qualche mostra.
      * @return tutti gli organizzatori, anche quelli che sono attualmente occupati.
@@ -135,6 +130,20 @@ public class Museo extends Observable {
         return organizzatori;
     }
 
+    public List<Personale> getImpiegati(boolean onlyFree){
+        ArrayList<Personale> organizzatori = new ArrayList<>();
+        if(onlyFree)
+            for(Personale p: personale)
+                if(p instanceof Impiegato)
+                    if(!p.isBusy())
+                        organizzatori.add(p);
+        else
+            for(Personale pp:personale)
+                if(pp instanceof Impiegato)
+                    organizzatori.add(p);
+        return organizzatori;
+    }
+
     /**
      *
      * @return List di tutte le opere di cui questo museo è il proprietario.
@@ -145,5 +154,8 @@ public class Museo extends Observable {
             if(opera.getProprietario() == this)
                 opere.add(opera);
         return opere;
+    }
+    public GestoreOpere getGestoreOpere(){
+        return gestoreOpere;
     }
 }

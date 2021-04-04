@@ -9,7 +9,7 @@ import visitatore.Visitatore;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestVendita {
+public class TestVenditaBigliettoIngresso {
     private Museo m;
 
     @BeforeEach

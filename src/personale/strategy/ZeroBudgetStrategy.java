@@ -1,8 +1,8 @@
-package personale;
+package personale.strategy;
 
 import museo.Museo;
 
-public class ZeroBudgetStrategy implements Strategy{
+public class ZeroBudgetStrategy implements Strategy {
     /**
      * Non essendoci soldi, non è possibile finanziare una Mostra.
      * @param museo Serve per dare le informazioni necessarie alla strategy.

@@ -1,4 +1,4 @@
-package personale;
+package personale.strategy;
 
 import museo.Museo;
 import opera.Opera;
@@ -6,10 +6,10 @@ import opera.Opera;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class AutomaticStrategy implements Strategy{
+public class OnSuggestStrategy implements Strategy {
     private final Set<Opera> opereRichieste;
 
-    AutomaticStrategy(Set<Opera> opereRichieste){
+    OnSuggestStrategy(Set<Opera> opereRichieste){
         this.opereRichieste = opereRichieste;
     }
 

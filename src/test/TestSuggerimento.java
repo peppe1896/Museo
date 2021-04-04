@@ -4,34 +4,29 @@ import museo.Museo;
 import museo.Suggerimento;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.Amministratore;
+import personale.strategy.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSuggerimento {
     private Museo museo;
     private Amministratore amministratore;
-    private Opera opera;
     private Visitatore visitatore;
-    private LinkedHashSet<Opera> opereBase;
     private Suggerimento suggerimento;
+    private String operaDiTest = "TestSuggerimento";
 
+    /**
+     * Faccio un suggerimento sull'opera di Test
+     */
     @BeforeEach
     public void initializeTest(){
-        opereBase = new LinkedHashSet<>();
         museo = new Museo();
-        opereBase.add(new Opera("Gioconda", "Leonardo Da Vinci", museo, 50));
-        opereBase.add(new Opera("Notte Stellata", "V. Van Gogh", museo, 50));
-        opereBase.add(new Opera("Giocasdonda", "Leonardsadso Da Vinci", museo, 50));
-        opereBase.add(new Opera("Gisadasoconda", "Leonardo asdDa Vinci", museo, 50));
-        opera = new Opera("Test", "Giuseppe", museo, 0);
         visitatore = new Visitatore(100);
-        museo.addOperaCatalogo(opera);
-        suggerimento = new Suggerimento(opera, visitatore);
+        Opera operaTest = museo.getGestoreOpere().getOperaNome(operaDiTest);
+        suggerimento = new Suggerimento(operaTest, visitatore);
         amministratore = new Amministratore(museo);
     }
 
@@ -47,7 +42,7 @@ public class TestSuggerimento {
         museo.registraSuggerimento(suggerimento);
         boolean assertion = false;
         for(Suggerimento o: museo.getSuggerimenti(visitatore))
-            if(o.getSuggerimento().getNome().equals("Test"))
+            if(o.getSuggerimento().getNome().equals("TestSuggerimento"))
                 assertion = true;
         assertTrue(assertion);
     }

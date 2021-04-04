@@ -1,6 +1,7 @@
-package personale;
+package personale.strategy;
 
 import museo.Museo;
+import opera.GestoreOpere;
 import opera.Opera;
 
 import java.util.ArrayList;
@@ -13,9 +14,10 @@ import java.util.ArrayList;
  * @return  IncaricoMostra da dare all'amministratore, che successivamente lo da a un organizzatore.
  *
  */
-public class HighBudgetStrategy implements Strategy{
+public class HighBudgetStrategy implements Strategy {
     @Override
     public IncaricoMostra creaIncaricoMostra(Museo museo){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
         int numeroOpereHighStrategy = 5;
         IncaricoMostra incarico = new IncaricoMostra(300);
         ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();
@@ -27,8 +29,10 @@ public class HighBudgetStrategy implements Strategy{
         }
         for(Opera o:museo.getCatalogoOpere()) {
             if(opereNuovoIncarico.size() < numeroOpereHighStrategy)
-                if(!opereMuseo.contains(o))
+                if(!o.isBusy() && o.getProprietario() != museo) {
+                    gestoreOpere.affittaOperaAMuseo(o, museo);
                     opereNuovoIncarico.add(o);
+                }
         }
         incarico.setOpereMostra(opereNuovoIncarico);
         return incarico;
