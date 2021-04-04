@@ -73,8 +73,6 @@ public class Museo extends Observable {
 
     public void registraSuggerimento(Suggerimento suggerimento){
         suggerimenti.add(suggerimento);
-        //TODO: potrebbe essere utile observer per notificare che è stato lasciato un
-        // suggerimento a l'amministratore
         setChanged();
         notifyObservers(suggerimento);
     }
@@ -88,7 +86,7 @@ public class Museo extends Observable {
         //TODO: ancora da implementare
     }
 
-    public void addOpera(Opera opera){
+    public void addOperaCatalogo(Opera opera){
         this.catalogoOpere.add(opera);
     }
 

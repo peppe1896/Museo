@@ -9,7 +9,7 @@ public class ZeroBudgetStrategy implements Strategy{
      * @return
      */
     @Override
-    public IncaricoMostra createIncaricoMostra(Museo museo) {
+    public IncaricoMostra creaIncaricoMostra(Museo museo) {
         return null;
     }
 }

@@ -10,5 +10,5 @@ public interface Strategy {
      * @param museo Serve per dare le informazioni necessarie alla strategy.
      * @return Un IncaricoMostra che può essere assegnato direttamente a un organizzatore.
      */
-    IncaricoMostra createIncaricoMostra(Museo museo);
+    IncaricoMostra creaIncaricoMostra(Museo museo);
 }

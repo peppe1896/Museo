@@ -6,23 +6,31 @@ import opera.Opera;
 import java.util.ArrayList;
 
 /**
- * Questa Strategy prende semplicemente 5 quadri da qualsiasi museo. Con questa strategy affitto 4 quadri e prendo
- * uno dal museo.
+ * Questa Strategy prende 4 quadri da qualsiasi museo e prendo uno dal museo passato come parametro.
+ * <p>
+ * Questi metodi creaIncaricoMostra compongono l'ArrayList {@code opereNuovoIncarico} mettendo prima le opere del museo, e poi
+ * quelle degli altri musei che verranno affittate.
+ * @return  IncaricoMostra da dare all'amministratore, che successivamente lo da a un organizzatore.
+ *
  */
 public class HighBudgetStrategy implements Strategy{
     @Override
-    public IncaricoMostra createIncaricoMostra(Museo museo){
+    public IncaricoMostra creaIncaricoMostra(Museo museo){
         int numeroOpereHighStrategy = 5;
         IncaricoMostra incarico = new IncaricoMostra(300);
-        ArrayList<Opera> opere = new ArrayList<>();
+        ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();
         ArrayList<Opera> opereMuseo = (ArrayList<Opera>) museo.getOpereMuseo();
-        opere.add(opereMuseo.get(0));
-        for(Opera o:museo.getCatalogoOpere()) {
-            if(opere.size() < numeroOpereHighStrategy)
-                if(!opereMuseo.contains(o))
-                    opere.add(o);
+        // Voglio solo un'opera del Museo proprietario, quindi metto la prima opera libera
+        for(Opera operaMuseo:opereMuseo) {
+            if(!operaMuseo.isBusy() && opereNuovoIncarico.size() == 0)
+                opereNuovoIncarico.add(operaMuseo);
         }
-        incarico.setOpereMostra(opere);
+        for(Opera o:museo.getCatalogoOpere()) {
+            if(opereNuovoIncarico.size() < numeroOpereHighStrategy)
+                if(!opereMuseo.contains(o))
+                    opereNuovoIncarico.add(o);
+        }
+        incarico.setOpereMostra(opereNuovoIncarico);
         return incarico;
     }
 }

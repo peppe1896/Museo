@@ -4,10 +4,7 @@ import museo.Museo;
 import museo.Suggerimento;
 import opera.Opera;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class Amministratore implements Observer {
     private Museo museo;
@@ -16,6 +13,7 @@ public class Amministratore implements Observer {
     private Strategy strategy;
 
     private ArrayList<IncaricoMostra> incarichiCreati = new ArrayList<>();
+    private Set<Opera> accumuloRichieste = new LinkedHashSet<>();
 
     /**
      * Il costruttore dell'Amministratore costruisce la LinkedHashMap prendendolo dal Catalogo delle opere
@@ -25,8 +23,7 @@ public class Amministratore implements Observer {
     public Amministratore(Museo museo){
         this.museo = museo;
         // Inizializzo con 0 suggerimenti per ogni opera.
-        for(Opera o: museo.getCatalogoOpere())
-            suggerimentiPerOpera.put(o,0);
+        loadSuggerimentiPerOpera();
         museo.addObserver(this);
         setStrategy();
     }
@@ -50,20 +47,44 @@ public class Amministratore implements Observer {
             suggerimentiPerOpera.put(opera, ++prevInt);
         }
         balanceMuseo = museo.getBilancio(this);
-
+        checkNumSuggerimenti();
         setStrategy();
     }
 
     /**
+     * Resetta la Mappa dei suggerimenti mettendo a 0 il count di tutti i suggerimenti e ricaricando il catalogoOpere
+     */
+    private void loadSuggerimentiPerOpera(){
+        suggerimentiPerOpera = new LinkedHashMap<>();
+        for(Opera o: museo.getCatalogoOpere())
+            suggerimentiPerOpera.put(o,0);
+    }
+    /**
      * Questo è il metodo che imposta la strategy a seconda dei parametri. Viene chiamato nel metodo update.
      */
     private void setStrategy(){
-        if(balanceMuseo <= 50)
-            strategy = new ZeroBudgetStrategy();
-        if(balanceMuseo <= 150 && balanceMuseo > 50)
-            strategy = new LowBudgetStrategy();
-        if(balanceMuseo > 150){
-            strategy = new HighBudgetStrategy();
+        if(accumuloRichieste.size() >= 2 && balanceMuseo >= 400) {
+            strategy = new AutomaticStrategy(accumuloRichieste);
+        } else {
+            if (balanceMuseo <= 50)
+                strategy = new ZeroBudgetStrategy();
+            if (balanceMuseo <= 150 && balanceMuseo > 50)
+                strategy = new LowBudgetStrategy();
+            if (balanceMuseo > 150)
+                strategy = new HighBudgetStrategy();
+        }
+    }
+
+    /**
+     * Controlla il numero dei suggerimenti e aggiunge al set di {@code accumuloRichieste} l'opera suggerita.
+     * Questo {@code Set} verrà passato al costruttore di {@code AutomaticStrategy} che metterà il numero più
+     * alto possibile di opere suggerite nella prossima mostra organizzata.
+     */
+    private void checkNumSuggerimenti(){
+        for(Map.Entry<Opera,Integer> entry: suggerimentiPerOpera.entrySet()){
+            if(entry.getValue()==5){
+                accumuloRichieste.add(entry.getKey());
+            }
         }
     }
 
@@ -71,16 +92,14 @@ public class Amministratore implements Observer {
         return suggerimentiPerOpera;
     }
 
-    //TODO: il metodo leggi idee è facile: i suggerimenti sono fatti, hai un numero di suggerimenti per
-    // ogni opera che esiste nel sistema.
-
     /**
-     * Crea un IncaricoMostra usando una Strategy.
+     * Crea un IncaricoMostra usando una Strategy e stanzia il denaro previsto dalla strategia, togliendolo
+     * dal budgetMostre del Museo.
      * // TODO: deve essere possibile creare IncaricoMostra anche in modo personalizzato e fuori dalle strategie.
      * @return Un IncaricoMostra ai soli fini di test.
      */
     public IncaricoMostra createIncaricoMostra(){
-        IncaricoMostra incaricoMostra = strategy.createIncaricoMostra(museo);
+        IncaricoMostra incaricoMostra = strategy.creaIncaricoMostra(museo);
         if(incaricoMostra != null) {
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
             museo.setBilancio(this, museo.getBilancio(this)-incaricoMostra.getBilancio());

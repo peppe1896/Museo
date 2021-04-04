@@ -15,7 +15,7 @@ public class LowBudgetStrategy implements Strategy{
      * @param museo Il museo sotto controllo dell'Amministratore
      */
     //TODO voglio poter mettere anche un'opera a noleggio
-    public IncaricoMostra createIncaricoMostra(Museo museo){
+    public IncaricoMostra creaIncaricoMostra(Museo museo){
         int numeroOpereLowStrategy = 3;
         IncaricoMostra incarico = new IncaricoMostra(50);
         ArrayList<Opera> opere = new ArrayList<>();

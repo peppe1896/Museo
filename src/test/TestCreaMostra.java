@@ -1,12 +1,14 @@
 package test;
 
 import museo.Museo;
+import museo.Suggerimento;
 import opera.Opera;
 import org.junit.jupiter.api.*;
 import personale.Amministratore;
 import personale.IncaricoMostra;
 import personale.LowBudgetStrategy;
 import personale.ZeroBudgetStrategy;
+import visitatore.Visitatore;
 
 import java.util.List;
 
@@ -19,7 +21,6 @@ public class TestCreaMostra {
     @BeforeEach
     public void setTest(){
         museo = new Museo();
-        amministratore = new Amministratore(museo);
     }
 
     /**
@@ -71,4 +72,26 @@ public class TestCreaMostra {
         assertTrue(count == 4);
     }
 
+    /**
+     * Dentro questo test creo un paio di suggerimenti per due opere, che attiva la AutomaticStrategy,
+     * che prevede di preparare un IncaricoMostra con 3 opere del museo e 2 suggerite.
+     */
+    @Test
+    @DisplayName("Test strategy automatica con alto numero di suggerimenti")
+    public void testStrategyAuto(){
+        Visitatore v = new Visitatore();
+        Opera opera1 = new Opera("TestA", "Giuseppe", null, 50);
+        Opera opera2 = new Opera("TestB", "Giuseppe", null, 50);
+        museo.getCatalogoOpere().add(opera1);
+        museo.getCatalogoOpere().add(opera2);
+        amministratore = new Amministratore(museo);
+        for(int i=0;i<5;i++)
+            museo.registraSuggerimento(new Suggerimento(opera1,v));
+        for(int i=0;i<5;i++)
+            museo.registraSuggerimento(new Suggerimento(opera2,v));
+        museo.setBilancio(amministratore,5000);
+        IncaricoMostra incaricoMostra = amministratore.createIncaricoMostra();
+        assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
+        assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
+    }
 }

@@ -21,7 +21,7 @@ public class TestSuggerimento {
     private Suggerimento suggerimento;
 
     @BeforeEach
-    public void initializeOperaVisitAmmin(){
+    public void initializeTest(){
         opereBase = new LinkedHashSet<>();
         museo = new Museo();
         opereBase.add(new Opera("Gioconda", "Leonardo Da Vinci", museo, 50));
@@ -30,7 +30,7 @@ public class TestSuggerimento {
         opereBase.add(new Opera("Gisadasoconda", "Leonardo asdDa Vinci", museo, 50));
         opera = new Opera("Test", "Giuseppe", museo, 0);
         visitatore = new Visitatore(100);
-        museo.addOpera(opera);
+        museo.addOperaCatalogo(opera);
         suggerimento = new Suggerimento(opera, visitatore);
         amministratore = new Amministratore(museo);
     }
