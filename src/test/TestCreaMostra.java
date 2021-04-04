@@ -49,7 +49,7 @@ public class TestCreaMostra {
         assertTrue(amministratore.getStrategy() instanceof LowBudgetStrategy);
         List<Opera> opereMostra = incaricoMostra.getOpereMostra();
         for(Opera o:opereMostra)
-            assertTrue(o.getProprietario()==museo);
+            assertSame(o.getProprietario(),museo);
     }
 
     /**
@@ -69,7 +69,7 @@ public class TestCreaMostra {
             if(o.getProprietario() != museo)
                 count++;
         }
-        assertTrue(count == 4);
+        assertEquals(count, 4);
     }
 
     /**
