@@ -22,7 +22,7 @@ public class OnSuggestStrategy implements Strategy {
     @Override
     public IncaricoMostra strategyMethod(Museo museo) {
         int numeroOpereAutoStrategy = 5;
-        IncaricoMostra incarico = new IncaricoMostra(200);
+        IncaricoMostra incarico = new IncaricoMostra(200, true);
         ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();
         ArrayList<Opera> opereMuseo = (ArrayList<Opera>) museo.getOpereMuseo();
         Set<Opera> catalogoOpere = museo.getCatalogoOpere();

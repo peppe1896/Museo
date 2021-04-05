@@ -6,7 +6,7 @@ import museo.Suggeritore;
  * La classe astratta che viene estesa in Organizzatore ed Impiegato.
  */
 public abstract class Personale implements Suggeritore {
-    private boolean busyInQualcheMostra;
+    private boolean busyInQualcheMostra = false;
     private int portafogli = 0;
 
     public boolean isBusy(){
@@ -26,7 +26,7 @@ public abstract class Personale implements Suggeritore {
     }
 
     public void setIncaricoImpiegato(IncaricoImpiegato incaricoImpiegato) throws Exception{
-        throw new Exception("Non si imposta un incarico a un Organizzatore");
+        throw new Exception("Non si imposta un IncaricoImpiegato a un Organizzatore");
     }
 
     public abstract void svolgiIncaricoAssegnato();

@@ -1,7 +1,11 @@
 package personale;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Impiegato extends Personale{
     private IncaricoImpiegato incaricoImpiegato = null;
+    List<IncaricoImpiegato> incarichiSvolti = new ArrayList<>();
 
     public void setIncaricoImpiegato(IncaricoImpiegato incaricoImpiegato){
         this.incaricoImpiegato = incaricoImpiegato;
@@ -10,7 +14,7 @@ public class Impiegato extends Personale{
     public void svolgiIncaricoAssegnato(){
         incaricoImpiegato.svolgiIncarico();
         incaricoImpiegato.setDone();
-        //TODO forse dovrebbe essere qui quello che resetta l'incaricoImpiegato a null
-        // in questo momento è l'organizzatore a resettare l'incarico.
+        incarichiSvolti.add(incaricoImpiegato);
+        incaricoImpiegato = null;
     }
 }

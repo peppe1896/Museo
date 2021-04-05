@@ -19,7 +19,7 @@ public class KillMostreStrategy implements Strategy{
     public IncaricoMostra strategyMethod(Museo museo) {
         for(IncaricoMostra im: incarichiMostre)
             if(im.isKillable()) {
-                im.avviaProceduraChiusuraMostra(amministratore);
+                im.forzaChiusuraMostra(amministratore);
                 return im;
             }
         return null;

@@ -21,7 +21,7 @@ public class HighBudgetStrategy implements Strategy {
     public IncaricoMostra strategyMethod(Museo museo){
         GestoreOpere gestoreOpere = museo.getGestoreOpere();
         int numeroOpereHighStrategy = 5;
-        IncaricoMostra incarico = new IncaricoMostra(300);
+        IncaricoMostra incarico = new IncaricoMostra(300, true);
         ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();
         ArrayList<Opera> opereMuseo = (ArrayList<Opera>) museo.getOpereMuseo();
         // Voglio solo un'opera del Museo proprietario, quindi metto la prima opera libera

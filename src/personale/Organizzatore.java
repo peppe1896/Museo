@@ -6,9 +6,11 @@ import museo.Sala;
 import opera.GestoreOpere;
 import opera.Opera;
 import personale.pkgIncaricoImpiegato.CreaPubblicità;
+import personale.pkgIncaricoImpiegato.OrganizzaSitoWeb;
 import personale.pkgIncaricoImpiegato.PulizieSalaFisica;
 import personale.pkgIncaricoImpiegato.spostareOpera;
 import personale.pkgIncaricoMostra.IncaricoMostra;
+import visitatore.Visitatore;
 
 import java.util.*;
 
@@ -34,9 +36,14 @@ public class Organizzatore extends Personale implements Observer {
         incaricoAttuale.addObserver(this);
     }
 
+    /**
+     * Viene chiamato per organizzare la Mostra. svolgiIncarico dell'IncaricoMostra serve solamente
+     * a stampare a schermo che la Mostra è stata organizzata.
+     */
     @Override
     public void svolgiIncaricoAssegnato() {
         organizzaMostra();
+        incaricoAttuale.svolgiIncarico();
     }
 
     /**
@@ -45,24 +52,29 @@ public class Organizzatore extends Personale implements Observer {
      * Questo metodo è chiamato
      */
     private void organizzaMostra(){
-        scegliImpiegati();
+        boolean ancheVirtuale = incaricoAttuale.isAncheVirtuale();
+        scegliImpiegati(ancheVirtuale);
         pagaImpiegati();
         affittaOpere();
-        assegnaCompiti();
-        setMostra();
+        assegnaCompiti(ancheVirtuale);
+        setMostra(ancheVirtuale);
         museo.addMostra(incaricoAttuale.getMostra());
         svolgiCompitiImpiegati();
-
     }
 
     /**
      * Sceglie gli impiegati da far lavorare nella mostra e li imposta come occupati. Imposta questo ArrayList
      * all'IncaricoMostra. Il valore 3 perché prevedo ancora solo 3 Incarichi per i dipendenti
      */
-    private void scegliImpiegati(){
+    private void scegliImpiegati(boolean ancheVirtuale){
+        int numeroImpiegatiRichiesti;
+        if(ancheVirtuale)
+            numeroImpiegatiRichiesti = 4;
+        else
+            numeroImpiegatiRichiesti = 3;
         ArrayList<Personale> impiegati = new ArrayList<>();
         for(Personale p:museo.getImpiegati(true))
-            if(impiegati.size() < 3)
+            if(impiegati.size() < numeroImpiegatiRichiesti)
                 if(!p.isBusy()){
                     p.setBusy();
                     impiegati.add(p);
@@ -93,8 +105,18 @@ public class Organizzatore extends Personale implements Observer {
         }
     }
 
-    private void assegnaCompiti() {
-        IncaricoImpiegato incarichi[] = new IncaricoImpiegato[3];
+    /**
+     * Se è solo fisica non ho bisogno di sito web e di altri incarichi.
+     * @param ancheVirtuale
+     */
+    private void assegnaCompiti(boolean ancheVirtuale) {
+        IncaricoImpiegato incarichi[];
+        if(ancheVirtuale) {
+            incarichi = new IncaricoImpiegato[4];
+            incarichi[3] = new OrganizzaSitoWeb();
+        }
+        else
+            incarichi = new IncaricoImpiegato[3];
         incarichi[0] = new CreaPubblicità();
         incarichi[1] = new spostareOpera();
         incarichi[2] = new PulizieSalaFisica();
@@ -113,7 +135,7 @@ public class Organizzatore extends Personale implements Observer {
      * Chiama in forward il metodo calcoloCostoIngresso che imposta il costo biglietto e imposta un insieme di Sale
      * per una Mostra
      */
-    private void setMostra(){
+    private void setMostra(boolean ancheVirtuale){
         Mostra mostra = new Mostra();
         incaricoAttuale.setMostra(this, mostra);
         mostra.addObserver(this);
@@ -121,7 +143,7 @@ public class Organizzatore extends Personale implements Observer {
         mostra.incassa(rimanenze);
         incaricoAttuale.prelevaDenaro(this, rimanenze);
         museo.addMostra(mostra);
-        calcolaCostoIngresso();
+        calcolaCostoIngresso(ancheVirtuale);
         mostra.setOpereMostra(incaricoAttuale.getOpereMostra());
     }
 
@@ -131,9 +153,9 @@ public class Organizzatore extends Personale implements Observer {
      * Per ottenere quanti soldi sono stati spesi vedo il valore dei fondiStaziati e vedo quanti soldi sono rimasti
      * in Mostra.
      */
-    private void calcolaCostoIngresso(){
+    private void calcolaCostoIngresso(boolean ancheVirtuale){
         Mostra mostra = incaricoAttuale.getMostra();
-        List<Sala> saleMuseo = museo.getSale(false);
+        List<Sala> saleMuseo = museo.getSale(ancheVirtuale);
         Set<Sala> saleMostra = new HashSet<>();
         for(int i=0;i<4;i++){
             saleMostra.add(saleMuseo.get((i)));
@@ -143,12 +165,14 @@ public class Organizzatore extends Personale implements Observer {
             count += s.getPostiSala();
             s.setBusy();
         }
-        int differenza = incaricoAttuale.fondiStanziati - mostra.getIncasso();
-        int costoBiglietto = differenza/count;
+        int fondiStanziati = incaricoAttuale.getFondiStanziati();
+        int rimanenzaFondiStanziati = fondiStanziati - mostra.getIncasso();
+        int costoBiglietto = rimanenzaFondiStanziati/count;
         costoBiglietto += 5;
         mostra.setPostiTotali(count);
-        mostra.setSale(saleMostra);
+        mostra.setSale(saleMostra, ancheVirtuale);
         mostra.setCostoBiglietto(costoBiglietto);
+        mostra.setIncassoObiettivo(costoBiglietto * count);
     }
 
     private void svolgiCompitiImpiegati(){
@@ -178,6 +202,30 @@ public class Organizzatore extends Personale implements Observer {
         for(Sala sala: saleMostra)
             sala.freeSala();
         this.setFree();
+        mostra.setTerminata();
+    }
+
+    /**
+     * Metodo chiamato dall'Amministratore tramite l'Observer
+     */
+    private void chiusuraForzata(){
+        stornaDenaroVisitatori();
+        chiudiMostra();
+    }
+
+    private void stornaDenaroVisitatori(){
+        Mostra mostra = incaricoAttuale.getMostra();
+        List<Visitatore> visitatori = mostra.getVisitatoriMostra();
+        int costoBiglietto = mostra.getCostoBiglietto();
+        int parteDaStornare = calcolaStorno(costoBiglietto, 0.4f);
+        for(Visitatore visitatore: visitatori)
+            visitatore.ottieniRimborso(parteDaStornare);
+    }
+
+    private int calcolaStorno(int costoBiglietto, double trattenuta){
+        double rimborso = costoBiglietto;
+        rimborso -= rimborso*trattenuta;
+        return (int) rimborso;
     }
 
     /**
@@ -189,6 +237,13 @@ public class Organizzatore extends Personale implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        chiudiMostra();
+        Mostra m = incaricoAttuale.getMostra();
+        // Se o!= m allora è l'Amministratore
+        if(o != m)
+            chiusuraForzata();
+        // altrimenti è la Mostra che si sta osservando.
+        else {
+               chiudiMostra();
+            }
     }
 }

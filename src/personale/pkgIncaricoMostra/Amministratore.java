@@ -1,6 +1,8 @@
 package personale.pkgIncaricoMostra;
 
+import museo.Mostra;
 import museo.Museo;
+import museo.StateMuseo;
 import museo.Suggerimento;
 import opera.Opera;
 import personale.Organizzatore;
@@ -17,13 +19,13 @@ import java.util.*;
 public class Amministratore implements Observer {
     private Museo museo;
     private LinkedHashMap<Opera, Integer> suggerimentiPerOpera = new LinkedHashMap<>();
-    private int balanceMuseo = 0;
+    private int bilancioMuseo = 0;
     private Strategy strategy;
-    private boolean killStrategy = false;
 
     private Set<IncaricoMostra> incarichiCreati = new HashSet<>();
     private Set<Opera> accumuloRichieste = new LinkedHashSet<>();
-
+    private double loadFactorSale = 0.f;
+    private List<Mostra> mostreChiuse = new ArrayList<>();
     /**
      * Il costruttore dell'Amministratore costruisce la LinkedHashMap prendendolo dal Catalogo delle opere
      * condiviso tra tutti i Musei.
@@ -37,30 +39,35 @@ public class Amministratore implements Observer {
         setStrategy();
     }
     /**
-     * Quando arrivano suggerimenti, riceve notifica e li legge.
-     * Ho preferito un observer di tipo push: quando mi arriva un suggerimento, aggiungo +1 all'opera
-     * corrispondente.
-     * //TODO: in questo momento a ogni notifica si prende il suggerimento
-     * //TODO: magari si può inserire un counter per vedere in quanti hanno richiesto una certa opera
-     * Questo meccanismo si può registrare usando una mappa <Opera,Integer> inserendo il numero di richieste così.
-     *<p>
-     * Il bilancio è aggiornato in modo pull usando il metodo getBalance del museo.
-     * <p> Verifico che sia il museo l'Observable. Essendo allo stesso tempo
+     * Aggiorna il suo stato con lo StateMuseo che viene passato come parametro.
+     * Lo StateMuseo viene creato ogni volta che cambia il loadFactorSale, per avviare la strategia
+     * di kill delle Mostre, ogni volta che viene creato un suggerimento e ogni volta che viene aggiornato il bilancio
      * @param o è sempre il Museo
-     * @param arg è il suggerimento appena inserito.
+     * @param arg StateMuseo.
      */
     @Override
     public void update(Observable o, Object arg) {
         if (arg != null) {
-            Opera opera = ((Suggerimento) arg).getSuggerimento();
-            int prevInt = suggerimentiPerOpera.get(opera);
-            suggerimentiPerOpera.put(opera, ++prevInt);
+            StateMuseo sm = (StateMuseo) arg;
+            Suggerimento suggerimento = sm.getOperaSuggerita();
+            Mostra mostra = sm.getMostraChiusa();
+            // Aggiungo suggerimenti
+            if(suggerimento != null) {
+                Opera opera = suggerimento.getSuggerimento();
+                int prevInt = suggerimentiPerOpera.get(opera);
+                suggerimentiPerOpera.put(opera, ++prevInt);
+            }
+            // Aggiorno bilancio
+            bilancioMuseo = sm.getBilancioMuseo();
+            // Aggiorno fattore di carico
+            loadFactorSale = sm.getLoadFactorSale();
+            // Aggiungo eventuale Mostra chiusa.
+            if(mostra != null)
+                mostreChiuse.add(mostra);
         }
-        balanceMuseo = museo.getBilancio(this);
+
         checkNumSuggerimenti();
         setStrategy();
-        // TODO fare la killStrategy quando ci sono le sale occupate.
-
     }
 
     /**
@@ -79,18 +86,17 @@ public class Amministratore implements Observer {
      * si può permettere.
      */
     private void setStrategy(){
-        if (killStrategy)
+        if (loadFactorSale > 0.5)
             strategy = new KillMostreStrategy(incarichiCreati, this);
         else {
-            if(accumuloRichieste.size() >= 2 && balanceMuseo >= 400) {
+            if(accumuloRichieste.size() >= 2 && bilancioMuseo >= 400) {
                 strategy = new OnSuggestStrategy(accumuloRichieste);
-                // killStrategy = true;
             } else {
-                if (balanceMuseo <= 50)
+                if (bilancioMuseo <= 50)
                     strategy = new ZeroBudgetStrategy();
-                if (balanceMuseo <= 150 && balanceMuseo > 50)
+                if (bilancioMuseo <= 150 && bilancioMuseo > 50)
                     strategy = new LowBudgetStrategy();
-                if (balanceMuseo > 150 && balanceMuseo < 5000)
+                if (bilancioMuseo > 150 && bilancioMuseo < 5000)
                     strategy = new HighBudgetStrategy();
 
             }
@@ -116,8 +122,8 @@ public class Amministratore implements Observer {
 
     /**
      * Crea un IncaricoMostra usando una Strategy e stanzia il denaro previsto dalla strategia, togliendolo
-     * dal budgetMostre del Museo.
-     * // TODO: deve essere possibile creare IncaricoMostra anche in modo personalizzato fuori dalle strategie.
+     * dal budgetMostre del Museo. || Se invece è impostata come Strategy quella di chiudere le mostre,
+     * chiude la mostra secondo quella Strategia. In qualsiasi caso, è lo strategyMethod che sa la procedura.
      * // TODO: ancora non si prevede di poter trovare un Organizzatore occupato.
      * @return : Ai soli fini di test. Non è necessario prendere il valore di ritorno per avere questo comportamento
      */

@@ -20,7 +20,7 @@ public class LowBudgetStrategy implements Strategy {
     //TODO voglio poter mettere anche un'opera a noleggio
     public IncaricoMostra strategyMethod(Museo museo){
         int numeroOpereLowStrategy = 3;
-        IncaricoMostra incarico = new IncaricoMostra(50);
+        IncaricoMostra incarico = new IncaricoMostra(50, false);
         ArrayList<Opera> opere = new ArrayList<>();
         for(Opera o:museo.getOpereMuseo())
             if(opere.size() <= numeroOpereLowStrategy)

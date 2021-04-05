@@ -21,4 +21,7 @@ public class Visitatore implements Suggeritore {
         this.bilancio = bilancio;
     }
 
+    public void ottieniRimborso(int rimborso){
+        this.bilancio += rimborso;
+    }
 }

@@ -50,6 +50,8 @@ public final class GestoreOpere {
      * @param richiedente Il museo che richiede l'opera
      */
 
+    // TODO aggiusta questo metodo: deve impostare anche per i proprietari delle opere che vogliono fare opere con le
+    //  proprie opere, e l'opera deve essere affittata solo se si ha la disponibilità economica di farlo.
     public void affittaOperaAMuseo(Opera operaDaAffittare, Museo richiedente){
         if(operaDaAffittare.getProprietario() != richiedente)
             if(!operaDaAffittare.isBusy()) {

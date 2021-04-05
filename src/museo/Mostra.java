@@ -2,7 +2,10 @@ package museo;
 
 import museo.sale.SalaVirtuale;
 import opera.Opera;
+import personale.Organizzatore;
+import visitatore.Visitatore;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -19,10 +22,16 @@ public class Mostra extends Observable {
     private int costoBiglietto;
     private int bigliettiVenduti = 0;
     private int postiTotali;
+    private int incassoObiettivo;
+    private List<Visitatore> visitatoriMostra = new ArrayList<>();
+    private boolean terminata = false;
+    private Organizzatore organizzatore;
 
     /**
      * Incassa aggiunge soldi alle casse della Mostra, se presente almeno 1 posto disponibile per la Mostra.
-     * Il return ci dice se l'operazione è andata a buon fine
+     * Il return ci dice se l'operazione è andata a buon fine. Chiama in forward il metodo checkRaggiuntoIncasso
+     * che nel caso l'incasso della Mostra abbia eguagliato o superato l'incassoObiettivo, manda una notifica
+     * all'organizzatore in ascolto che provvede a chiudere la Mostra.
      * @param incasso Soldi da aggiungere all'incasso della Mostra.
      * @return true ci sono posti per la mostra
      */
@@ -31,9 +40,14 @@ public class Mostra extends Observable {
             this.incasso += incasso;
             postiTotali--;
             bigliettiVenduti++;
+            checkRaggiuntoIncasso();
             return true;
         }
         return false;
+    }
+
+    public void addVisitatore(Visitatore visitatore){
+        this.visitatoriMostra.add(visitatore);
     }
 
     public void setCostoBiglietto(int costoBiglietto){
@@ -49,11 +63,9 @@ public class Mostra extends Observable {
      * Inoltre capisco se una di queste sale è virtuali, e imposto il parametro ancheOnline di conseguenza.
      * @param sale Le Sale che sono state dedicate a questa Mostra.
      */
-    public void setSale(Set<Sala> sale){
+    public void setSale(Set<Sala> sale, boolean ancheOnline){
         this.sale = sale;
-        for(Sala s:sale)
-            if(s instanceof SalaVirtuale)
-                ancheOnline = true;
+        this.ancheOnline = ancheOnline;
     }
 
     public void setOpereMostra(List<Opera> opereMostra){
@@ -84,5 +96,40 @@ public class Mostra extends Observable {
 
     public void setPostiTotali(int postiTotali){
         this.postiTotali = postiTotali;
+    }
+
+    public void setIncassoObiettivo(int incassoObiettivo){
+        this.incassoObiettivo = incassoObiettivo;
+    }
+
+    private void checkRaggiuntoIncasso(){
+        if(incasso >= incassoObiettivo) {
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    /**
+     * Ci serve per fare l'eventuale Storno dei biglietti.
+     * @return
+     */
+    public List<Visitatore> getVisitatoriMostra(){
+        return visitatoriMostra;
+    }
+
+    public void setTerminata(){
+        this.terminata = terminata;
+    }
+
+    public boolean isTerminata(){
+        return terminata;
+    }
+
+    public void setOrganizzatore(Organizzatore organizzatore){
+        this.organizzatore = organizzatore;
+    }
+
+    public Organizzatore getOrganizzatore(){
+        return organizzatore;
     }
 }

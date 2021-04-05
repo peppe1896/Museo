@@ -18,14 +18,15 @@ public class Museo extends Observable {
     private int bilancio;
 
     private List<Visitatore> listaVisitatori = new ArrayList<>();
-    private LinkedHashMap<String, List<TicketMuseo>> ticketMuseoVenduti;
+    private Map<String, ArrayList<TicketMuseo>> ticketMuseoVenduti;
     private Set<Opera> catalogoOpere;
     private List<Suggerimento> suggerimenti = new ArrayList<>();
     private List<Personale> personale = new ArrayList<>();
     private GestoreOpere gestoreOpere;
     private List<Sala> sale = new ArrayList<>();
-    private ArrayList<Mostra> mostre = new ArrayList<>();
+    private Set<Mostra> mostre = new LinkedHashSet<>();
 
+    private double loadFactorSale = 0.f;
     /**
      * <h2>Costruttori</h2>
      */
@@ -38,13 +39,24 @@ public class Museo extends Observable {
         personale.add(new Impiegato());
         personale.add(new Impiegato());
         personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
+        personale.add(new Impiegato());
 
         personale.add(new Organizzatore(this));
+        personale.add(new Organizzatore(this));
+        personale.add(new Organizzatore(this));
+        personale.add(new Organizzatore(this));
 
-        ticketMuseoVenduti = new LinkedHashMap<>();
-        ticketMuseoVenduti.put("Biglietto Base", new ArrayList<>());
-        ticketMuseoVenduti.put("Ticket Mostra", new ArrayList<>());
-        ticketMuseoVenduti.put("Ticket Virtuale", new ArrayList<>());
+        ticketMuseoVenduti = Map.of(
+                "Biglietto Base", new ArrayList<TicketMuseo>(),
+                "Ticket Mostra", new ArrayList<TicketMuseo>(),
+                "Ticket Virtuale", new ArrayList<TicketMuseo>()
+        );
 
         sale = List.of(new SalaFisica(5),
                 new SalaFisica(5),
@@ -57,7 +69,8 @@ public class Museo extends Observable {
                 new SalaVirtuale(15),
                 new SalaFisica(5),
                 new SalaVirtuale(15),
-                new SalaFisica(5)
+                new SalaFisica(5),
+                new SalaVirtuale(15)
         );
 
     }
@@ -93,8 +106,9 @@ public class Museo extends Observable {
 
     public boolean vendiTicketMostra(Visitatore visitatore, Mostra mostra){
         if(visitatore.paga(mostra.getCostoBiglietto())){
+            mostra.addVisitatore(visitatore);
             if(mostra.isVirtual())
-                ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraFisica(visitatore));
+                ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraVirtuale(visitatore));
             else
                 ticketMuseoVenduti.get("Ticket Mostra").add(new TicketMostraFisica(visitatore));
             return true;
@@ -105,9 +119,14 @@ public class Museo extends Observable {
     public void registraSuggerimento(Suggerimento suggerimento){
         suggerimenti.add(suggerimento);
         setChanged();
-        notifyObservers(suggerimento);
+        notifyObservers(new StateMuseo(suggerimento, bilancio, loadFactorSale, null));
     }
 
+    /**
+     * Metodo usato dal Test Suggerimenti
+     * @param richiedente Il test
+     * @return I suggerimenti
+     */
     public List<Suggerimento> getSuggerimenti(Object richiedente){
         if(richiedente instanceof Amministratore)
             System.out.println("Sono un amministratore");
@@ -136,7 +155,7 @@ public class Museo extends Observable {
         if(richiedente instanceof Amministratore) {
             this.bilancio = bilancio;
             setChanged();
-            notifyObservers();
+            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
         }
     }
 
@@ -144,7 +163,7 @@ public class Museo extends Observable {
         if(richiedente instanceof Organizzatore || richiedente instanceof Amministratore) {
             this.bilancio += incasso;
             setChanged();
-            notifyObservers();
+            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
         }
     }
 
@@ -152,7 +171,7 @@ public class Museo extends Observable {
         if(richiedente instanceof Amministratore) {
             this.bilancio -= prelievo;
             setChanged();
-            notifyObservers();
+            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
         }
     }
 
@@ -162,37 +181,47 @@ public class Museo extends Observable {
      */
     public List<Personale> getOrganizzatori(boolean onlyFree){
         ArrayList<Personale> organizzatori = new ArrayList<>();
-        if(onlyFree)
-            for(Personale p: personale)
-                if(p instanceof Organizzatore)
-                    if(!p.isBusy())
+        if(onlyFree) {
+            for (Personale p : personale)
+                if (p instanceof Organizzatore)
+                    if (!p.isBusy())
                         organizzatori.add(p);
-        else
-            for(Personale pp:personale)
-                if(pp instanceof Organizzatore)
+        }
+        else {
+            for (Personale p : personale)
+                if (p instanceof Organizzatore)
                     organizzatori.add(p);
+        }
         return organizzatori;
     }
 
     public List<Personale> getImpiegati(boolean onlyFree){
         ArrayList<Personale> organizzatori = new ArrayList<>();
-        if(onlyFree)
-            for(Personale p: personale)
-                if(p instanceof Impiegato)
-                    if(!p.isBusy())
+        if(onlyFree) {
+            for (Personale p : personale)
+                if (p instanceof Impiegato)
+                    if (!p.isBusy())
                         organizzatori.add(p);
-        else
-            for(Personale pp:personale)
-                if(pp instanceof Impiegato)
+        }
+        else {
+            for (Personale p : personale)
+                if (p instanceof Impiegato)
                     organizzatori.add(p);
+        }
         return organizzatori;
     }
 
-    public List<Sala> getSale(boolean onlyVirtual){
+    /**
+     * Fornisce una Lista di Sale libere che contiene solamente SaleFisiche o SaleFisiche e SaleVirtuali.
+     * @param ancheVirtuali se true: tra le Sale prende anche quelle SaleVirtuali | se false, prende solo
+     *                      SaleFisiche.
+     * @return Lista di Sale.
+     */
+    public List<Sala> getSale(boolean ancheVirtuali){
         List<Sala> sale = new ArrayList<>();
-        if(onlyVirtual) {
+        if(!ancheVirtuali) {
             for (Sala sala : this.sale)
-                if (sala instanceof SalaVirtuale)
+                if (sala instanceof SalaFisica)
                     if (!sala.isBusy())
                         sale.add(sala);
         }
@@ -221,9 +250,27 @@ public class Museo extends Observable {
 
     public void addMostra(Mostra mostra){
         this.mostre.add(mostra);
+        updateLoadFactorSale();
+        setChanged();
+        notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
     }
 
-    public List<Mostra> getMostre(){
+    public Set<Mostra> getMostre(){
         return mostre;
+    }
+
+    private void updateLoadFactorSale(){
+        int saleOccupate = 0;
+        for(Sala sala:sale)
+            if(sala.isBusy())
+                saleOccupate++;
+        loadFactorSale = ((double) saleOccupate)/((double) sale.size());
+    }
+
+    public void chiudiMostra(Organizzatore organizzatore, Mostra mostra){
+        if(organizzatore == mostra.getOrganizzatore()){
+            setChanged();
+            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, mostra));
+        }
     }
 }

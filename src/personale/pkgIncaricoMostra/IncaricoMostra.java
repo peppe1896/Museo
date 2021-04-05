@@ -27,24 +27,26 @@ public class IncaricoMostra extends Observable implements Incarico {
     private ArrayList<Personale> impiegati;
     private boolean killable = true;
     private Mostra mostra = null;
-    public final int fondiStanziati;
+    private final boolean ancheVirtuale;
+    private final int fondiStanziati;
 
-    IncaricoMostra(int bilancioMostra){
+    IncaricoMostra(int bilancioMostra, boolean ancheVirtuale){
         opereMostra = new ArrayList<>();
         bilancio = bilancioMostra;
         fondiStanziati = bilancioMostra;
+        this.ancheVirtuale = ancheVirtuale;
     }
 
     /**
      * Metodi che usa l'Amministratore
      */
-    public void setOrganizzatore(Organizzatore organizzatore){
+    void setOrganizzatore(Organizzatore organizzatore){
         this.organizzatore = organizzatore;
     }
-    public void setOpereMostra(List<Opera> opere){
+    void setOpereMostra(List<Opera> opere){
         opereMostra = (ArrayList<Opera>) opere;
     }
-    public void avviaProceduraChiusuraMostra(Object requester){
+    void forzaChiusuraMostra(Object requester){
         if(requester instanceof Amministratore) {
             setChanged();
             notifyObservers();
@@ -88,7 +90,7 @@ public class IncaricoMostra extends Observable implements Incarico {
 
     @Override
     public boolean svolgiIncarico() {
-        // TODO da implementare lo svolgiIncarico di IncaricoMostra
+        System.out.println("La mostra è pronta. Ora è aperta ai visitatori");
         return true;
     }
 
@@ -112,5 +114,13 @@ public class IncaricoMostra extends Observable implements Incarico {
 
     public Personale getOrganizzatore(){
         return organizzatore;
+    }
+
+    public boolean isAncheVirtuale(){
+        return ancheVirtuale;
+    }
+
+    public int getFondiStanziati(){
+        return fondiStanziati;
     }
 }

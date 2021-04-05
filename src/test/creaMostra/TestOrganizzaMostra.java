@@ -1,17 +1,19 @@
 package test.creaMostra;
 
 import museo.Museo;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import personale.pkgIncaricoMostra.Amministratore;
 import personale.pkgIncaricoMostra.IncaricoMostra;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestOrganizzaMostra {
     private static Museo museo;
     private static Amministratore amministratore;
     private static IncaricoMostra incaricoMostra;
+    private static IncaricoMostra incaricoMostra2;
+    private static IncaricoMostra incaricoMostra3;
+    private static IncaricoMostra incaricoMostra4;
 
     @BeforeAll
     public static void initTest(){
@@ -19,12 +21,29 @@ public class TestOrganizzaMostra {
         amministratore = new Amministratore(museo);
         museo.setBilancio(amministratore, 1500);
         incaricoMostra = amministratore.createIncaricoMostra();
-        System.out.println("");
+        incaricoMostra2 = amministratore.createIncaricoMostra();
+        incaricoMostra3 = amministratore.createIncaricoMostra();
+        incaricoMostra4 = amministratore.createIncaricoMostra();
     }
+
+    /**
+     * L'incarico assegnato a un organizzatore è appunto organizzare una mostra. Quindi chiamando il metodo
+     * svolgiIncarico mi aspetto di trovare una Mostra nel Museo.
+     */
     @Test
-    public void test(){
+    @DisplayName("Test creazione una Mostra")
+    public void testSingolaMostra(){
         incaricoMostra.getOrganizzatore().svolgiIncaricoAssegnato();
-        assertTrue(museo.getMostre().size()==1);
+        assertEquals(museo.getMostre().size(), 1);
+    }
+
+    @Test
+    @DisplayName("Test creazione Mostre con singola Strategia")
+    public void testMultiMostreSingolaStrategia(){
+        incaricoMostra2.getOrganizzatore().svolgiIncaricoAssegnato();
+        incaricoMostra3.getOrganizzatore().svolgiIncaricoAssegnato();
+        incaricoMostra4.getOrganizzatore().svolgiIncaricoAssegnato();
+        assertEquals(museo.getMostre().size(), 4);
     }
 
 }
