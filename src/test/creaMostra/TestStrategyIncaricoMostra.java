@@ -1,5 +1,7 @@
 package test.creaMostra;
 
+
+import museo.Mostra;
 import museo.Museo;
 import museo.Suggerimento;
 import opera.GestoreOpere;
@@ -7,8 +9,6 @@ import opera.Opera;
 import org.junit.jupiter.api.*;
 import personale.pkgIncaricoMostra.Amministratore;
 import personale.pkgIncaricoMostra.IncaricoMostra;
-import personale.pkgIncaricoMostra.LowBudgetStrategy;
-import personale.pkgIncaricoMostra.ZeroBudgetStrategy;
 import visitatore.Visitatore;
 
 import java.util.List;
@@ -34,11 +34,10 @@ public class TestStrategyIncaricoMostra {
      */
     @Test
     @DisplayName("Test strategy bilancio zero")
-    public void testStrategyZeroBal(){
+    public void testStrategyNoMoves(){
         museo.setBilancio(amministratore, 0);
-        IncaricoMostra incaricoMostra = amministratore.createIncaricoMostra();
+        IncaricoMostra incaricoMostra = amministratore.azioneAmministratore();
         assertNull(incaricoMostra);
-        assertTrue(amministratore.getStrategy() instanceof ZeroBudgetStrategy);
     }
 
     /**
@@ -48,13 +47,13 @@ public class TestStrategyIncaricoMostra {
     @Test
     @DisplayName("Test strategy bilancio basso")
     public void testStrategyLowBal(){
+        amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore, 150);
-        IncaricoMostra incaricoMostra = amministratore.createIncaricoMostra();
+        IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(1);
         assertNotNull(incaricoMostra);
-        assertTrue(amministratore.getStrategy() instanceof LowBudgetStrategy);
         List<Opera> opereMostra = incaricoMostra.getOpereMostra();
         for(Opera o:opereMostra)
-            assertSame(o.getProprietario(),museo);
+            assertSame(o.getProprietario(), museo);
     }
 
     /**
@@ -65,9 +64,9 @@ public class TestStrategyIncaricoMostra {
     @Test
     @DisplayName("Test strategy bilancio sostanzioso")
     public void testStrategyHighBal(){
-        museo.setBilancio(amministratore,300);
-        IncaricoMostra incaricoMostra = amministratore.createIncaricoMostra();
-        assertNotNull(incaricoMostra);
+        amministratore.setAmministratoreAutomatico(false);
+        museo.setBilancio(amministratore,3000);
+        IncaricoMostra incaricoMostra = amministratore.azioneAmministratore();
         List<Opera> opere = incaricoMostra.getOpereMostra();
         int count = 0;
         for(Opera o: opere){
@@ -80,32 +79,36 @@ public class TestStrategyIncaricoMostra {
     /**
      * Ci sono due Opere TestA e TestB presenti dentro le opere. Aggiungendo più suggerimenti per le due opere mi
      * aspetto che l'Amministratore crei un IncaricoMostra con all'interno le due opere.
+     * Uso questo test per creare l'IncaricoMostra per il testKillStrategy
      */
     @Test
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
-    public void testStrategyAuto(){
+    public IncaricoMostra testStrategyAuto(){
+        amministratore.setAmministratoreAutomatico(false);
         Visitatore v = new Visitatore();
-        amministratore.loadSuggerimentiPerOpera(this);
         Opera opera1 = gestoreOpere.getOperaNome("TestA");
         Opera opera2 = gestoreOpere.getOperaNome("TestB");
-        for(int i=0;i<5;i++)
-            museo.registraSuggerimento(new Suggerimento(opera1,v));
-        for(int j=0;j<5;j++)
-            museo.registraSuggerimento(new Suggerimento(opera2,v));
-        museo.setBilancio(amministratore,5000);
-        incaricoMostra = amministratore.createIncaricoMostra();
+        for(int i=0;i<5;i++) {
+            museo.registraSuggerimento(new Suggerimento(opera1, v));
+            museo.registraSuggerimento(new Suggerimento(opera2, v));
+        }
+        incaricoMostra = amministratore.forceStrategyExecution(3);
         assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
         assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
+        return incaricoMostra;
     }
 
+    /**
+     * Test che prova la KillStrategy. Mi aspetto che con la KillStrategy ci siano delle Mostre chiuse
+     * dentro Amministratore.
+     */
     @Test
-    @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolimento")
+    @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolgimento")
     public void testKillStrategy(){
-        testStrategyAuto(); // creo, tramite strategy precedente, un IncaricoMostra
-        museo.setBilancio(amministratore, 50000);
-        incaricoMostra = amministratore.createIncaricoMostra();
-        for(Opera o: incaricoMostra.getOpereMostra())
-            assertFalse(o.isBusy()); // mi aspetto che le opere che avevo affittato siano tornate di nuovo libere
-        assertFalse(incaricoMostra.isKillable()); //vuol dire che non è killabile, cioè che è già stato killato.
+        incaricoMostra = testStrategyAuto();
+        Mostra m = incaricoMostra.getMostra();
+        assertFalse(m.isTerminata());
+        amministratore.forceStrategyExecution(0);
+        assertTrue(m.isTerminata());
     }
 }

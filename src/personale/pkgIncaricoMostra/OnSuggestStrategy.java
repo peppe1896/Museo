@@ -1,16 +1,20 @@
 package personale.pkgIncaricoMostra;
 
 import museo.Museo;
+import opera.GestoreOpere;
 import opera.Opera;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
 
 public class OnSuggestStrategy implements Strategy {
-    private final Set<Opera> opereRichieste;
+    private Set<Opera> opereRichieste;
+    private Amministratore amministratore;
 
-    OnSuggestStrategy(Set<Opera> opereRichieste){
+    OnSuggestStrategy(Set<Opera> opereRichieste, Amministratore amministratore){
         this.opereRichieste = opereRichieste;
+        this.amministratore = amministratore;
     }
 
     /**
@@ -21,21 +25,31 @@ public class OnSuggestStrategy implements Strategy {
      */
     @Override
     public IncaricoMostra strategyMethod(Museo museo) {
+        ArrayList<Opera> opereResetSuggerimenti = new ArrayList<>();
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
         int numeroOpereAutoStrategy = 5;
         IncaricoMostra incarico = new IncaricoMostra(200, true);
         ArrayList<Opera> opereNuovoIncarico = new ArrayList<>();
         ArrayList<Opera> opereMuseo = (ArrayList<Opera>) museo.getOpereMuseo();
-        Set<Opera> catalogoOpere = museo.getCatalogoOpere();
-
-        for(Opera operaMuseo:opereMuseo) {
-            if(!operaMuseo.isBusy() && opereNuovoIncarico.size() < 3)
+        Iterator<Opera> iterator = opereMuseo.iterator();
+        while(opereNuovoIncarico.size() < 3 && iterator.hasNext()){
+            Opera operaMuseo = iterator.next();
+            if(!operaMuseo.isBusy())
+                gestoreOpere.affittaOperaAMuseo(operaMuseo, incarico, museo);
                 opereNuovoIncarico.add(operaMuseo);
         }
-        for(Opera o:opereRichieste) {
-            if(opereNuovoIncarico.size() < numeroOpereAutoStrategy)
-                if(o.getProprietario() != museo && !o.isBusy())
-                    opereNuovoIncarico.add(o);
+        iterator = opereRichieste.iterator();
+        while(opereNuovoIncarico.size() < numeroOpereAutoStrategy && iterator.hasNext()){
+            Opera opera = iterator.next();
+                if(opera.getProprietario() != museo)
+                    if(!opera.isBusy()){
+                    gestoreOpere.affittaOperaAMuseo(opera, incarico, museo);
+                    opereNuovoIncarico.add(opera);
+                    opereResetSuggerimenti.add(opera);
+                }
         }
+        amministratore.resetSuggerimentiPerOpere(opereResetSuggerimenti);
+
         incarico.setOpereMostra(opereNuovoIncarico);
         return incarico;
     }

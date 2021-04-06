@@ -1,5 +1,7 @@
 package museo;
 
+import museo.sale.Sala;
+import museo.sale.SalaFisica;
 import museo.sale.SalaVirtuale;
 import opera.Opera;
 import personale.Organizzatore;
@@ -26,27 +28,66 @@ public class Mostra extends Observable {
     private List<Visitatore> visitatoriMostra = new ArrayList<>();
     private boolean terminata = false;
     private Organizzatore organizzatore;
+    private int postiFisici = 0;
+    private int postiVirtuali = 0;
 
     /**
-     * Incassa aggiunge soldi alle casse della Mostra, se presente almeno 1 posto disponibile per la Mostra.
-     * Il return ci dice se l'operazione è andata a buon fine. Chiama in forward il metodo checkRaggiuntoIncasso
-     * che nel caso l'incasso della Mostra abbia eguagliato o superato l'incassoObiettivo, manda una notifica
-     * all'organizzatore in ascolto che provvede a chiudere la Mostra.
-     * @param incasso Soldi da aggiungere all'incasso della Mostra.
-     * @return true ci sono posti per la mostra
+     * Procedura per pagare il costo del biglietto. Verifica se si può acquistare un posto, e se si, aggiunge l'importo
+     * del biglietto alla cassa della Mostra. Ritorna True se è riuscito a pagare
+     * Più specificatamente.
+     * Sto cercando un posto virtuale->se c'è un posto virtuale disponibile, incasso il costo del biglietto, tolgo
+     * 1 ai posti virtuali disponibili e ritorno true, altrimenti se non ci sono posti virtuali disponibili, ritorno false.
+     * Se il parametro è false, vuol dire che sto cercando un posto fisico. Stesso ragionamento.
+     * @param visitatore Colui che sta comprando il Biglietto.
+     * @param postoVirtuale se sto cercando un posto virtuale || false è per indicare un posto fisico
+     * @return true se c'è un posto disponibile, e incasso il prezzo del biglietto.
      */
-    public boolean incassa(int incasso){
-        if(postiTotali>0) {
-            this.incasso += incasso;
-            postiTotali--;
-            bigliettiVenduti++;
-            checkRaggiuntoIncasso();
-            return true;
+    public boolean pagaIngresso(Visitatore visitatore, boolean postoVirtuale){
+        if (postoVirtuale) {
+            if (acquistabile(postoVirtuale)){
+                this.incasso += incasso;
+                postiTotali--;
+                bigliettiVenduti++;
+                checkRaggiuntoIncasso();
+                addVisitatore(visitatore);
+                return true;
+            }
+        }else{
+            if(acquistabile(!postoVirtuale)) {
+                this.incasso += incasso;
+                postiTotali--;
+                bigliettiVenduti++;
+                checkRaggiuntoIncasso();
+                addVisitatore(visitatore);
+                return true;
+            }
+        }return false;
+    }
+    public void incassa(int incassa){
+        this.incasso += incassa;
+    }
+    /**
+     * E' acquistabile un posto? Con il boolean chiedo se posso acquistare un posto virtuale, e con false
+     * chiedo se posso acquistare un posto fisico.
+     * @param postoFisico se true vedo se un postoFisico è acquistabile.
+     * @return true se puoi comprarlo
+     */
+    private boolean acquistabile(boolean postoFisico){
+        if(postoFisico) {
+            if(postiFisici > 0) {
+                postiFisici--;
+                return true;
+            }
+        } else {
+            if (postiVirtuali > 0) {
+                postiVirtuali--;
+                return true;
+            }
         }
         return false;
     }
 
-    public void addVisitatore(Visitatore visitatore){
+    private void addVisitatore(Visitatore visitatore){
         this.visitatoriMostra.add(visitatore);
     }
 
@@ -58,14 +99,19 @@ public class Mostra extends Observable {
         return costoBiglietto;
     }
 
-    /**
-     * Conto quanti posti ho disponibili nelle sale, e li inserisco come posti massimi della Mostra.
-     * Inoltre capisco se una di queste sale è virtuali, e imposto il parametro ancheOnline di conseguenza.
-     * @param sale Le Sale che sono state dedicate a questa Mostra.
-     */
     public void setSale(Set<Sala> sale, boolean ancheOnline){
         this.sale = sale;
         this.ancheOnline = ancheOnline;
+        for(Sala sala:sale) {
+            if (sala instanceof SalaVirtuale) {
+                postiVirtuali += sala.getPostiSala();
+            }
+            if (sala instanceof SalaFisica) {
+                postiFisici += sala.getPostiSala();
+            }
+        }
+        if((postiFisici+postiVirtuali) != postiTotali)
+            System.err.println("ERRORE: non c'è lo stesso numero di posti");
     }
 
     public void setOpereMostra(List<Opera> opereMostra){
@@ -74,7 +120,7 @@ public class Mostra extends Observable {
     /**
      * Da attivare in fase di chiusura. Svuota le casse della Mostra. L'Organizzatore ha il compito di prendere
      * questo dato e di aggiungerlo al budget del Museo.
-      * @return i soldi guadagnati dalla mostra
+     * @return i soldi guadagnati dalla mostra
      */
     public int svuotaCasse(){
         int temp = incasso;
@@ -102,6 +148,10 @@ public class Mostra extends Observable {
         this.incassoObiettivo = incassoObiettivo;
     }
 
+    /**
+     * Se ho raggiunto l'incasso che mi sono prefissato, chiudo la mostra e ritorno le opere. Mando una notifica all'organizzatore
+     * che la Mostra è finita così che lui possa avviare la procedura di chiusura.
+     */
     private void checkRaggiuntoIncasso(){
         if(incasso >= incassoObiettivo) {
             setChanged();
@@ -111,14 +161,14 @@ public class Mostra extends Observable {
 
     /**
      * Ci serve per fare l'eventuale Storno dei biglietti.
-     * @return
+     * @return i Visitatori che hanno pagato il biglietto.
      */
     public List<Visitatore> getVisitatoriMostra(){
         return visitatoriMostra;
     }
 
     public void setTerminata(){
-        this.terminata = terminata;
+        this.terminata = true;
     }
 
     public boolean isTerminata(){
@@ -132,4 +182,17 @@ public class Mostra extends Observable {
     public Organizzatore getOrganizzatore(){
         return organizzatore;
     }
+
+    public int getPostiRimasti(){
+        return postiTotali;
+    }
+
+    public int getPostiFisiciRimasti(){
+        return postiFisici;
+    }
+
+    public int getPostiVirtualiRimasti(){
+        return postiVirtuali;
+    }
+
 }

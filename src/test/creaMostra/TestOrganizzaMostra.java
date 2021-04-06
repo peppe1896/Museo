@@ -20,10 +20,6 @@ public class TestOrganizzaMostra {
         museo = new Museo();
         amministratore = new Amministratore(museo);
         museo.setBilancio(amministratore, 1500);
-        incaricoMostra = amministratore.createIncaricoMostra();
-        incaricoMostra2 = amministratore.createIncaricoMostra();
-        incaricoMostra3 = amministratore.createIncaricoMostra();
-        incaricoMostra4 = amministratore.createIncaricoMostra();
     }
 
     /**

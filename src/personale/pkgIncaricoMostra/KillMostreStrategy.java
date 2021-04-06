@@ -20,7 +20,6 @@ public class KillMostreStrategy implements Strategy{
         for(IncaricoMostra im: incarichiMostre)
             if(im.isKillable()) {
                 im.forzaChiusuraMostra(amministratore);
-                return im;
             }
         return null;
     }

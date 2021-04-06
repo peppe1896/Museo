@@ -1,6 +1,9 @@
 package opera;
 
 import museo.Museo;
+import personale.NoMoneyException;
+import personale.pkgIncaricoMostra.IncaricoMostra;
+
 import java.util.Set;
 
 public final class GestoreOpere {
@@ -29,6 +32,27 @@ public final class GestoreOpere {
                 new Opera("Ophelia", "John Everett Millais", museo, 50),
                 new Opera("TestA", "Giuseppe", null, 50),
                 new Opera("TestB", "Giuseppe", null, 50),
+                new Opera("TestC", "Giuseppe", null, 50),
+                new Opera("TestD", "Giuseppe", null, 50),
+                new Opera("TestE", "Giuseppe", null, 50),
+                new Opera("TestF", "Giuseppe", null, 50),
+                new Opera("TestG", "Giuseppe", null, 50),
+                new Opera("TestH", "Giuseppe", null, 50),
+                new Opera("TestI", "Giuseppe", null, 50),
+                new Opera("TestL", "Giuseppe", null, 50),
+                new Opera("TestM", "Giuseppe", null, 50),
+                new Opera("TestN", "Giuseppe", null, 50),
+                new Opera("TestO", "Giuseppe", null, 50),
+                new Opera("TestP", "Giuseppe", null, 50),
+                new Opera("TestR", "Giuseppe", null, 50),
+                new Opera("TestS", "Giuseppe", null, 50),
+                new Opera("TestT", "Giuseppe", null, 50),
+                new Opera("TestU", "Giuseppe", null, 50),
+                new Opera("TestV", "Giuseppe", null, 50),
+                new Opera("TestW", "Giuseppe", null, 50),
+                new Opera("TestX", "Giuseppe", null, 50),
+                new Opera("TestY", "Giuseppe", null, 50),
+                new Opera("TestZ", "Giuseppe", null, 50),
                 new Opera("TestSuggerimento", "Giuseppe", museo, 0)
         );
     }
@@ -44,26 +68,39 @@ public final class GestoreOpere {
     /**
      * Affitta un opera a un Museo richiedente, verificando che l'opera non sia di questo museo e facendo aumentare il
      * bilancio del museo proprietario del costo di noleggio dell'opera.
+     * Attenzione: non si preoccupa di fare la transazione sui soldi, ma solo di aggiungere al proprietario la somma
+     * del prestito. Sta a chi ha chiamato questa funzione di
      * <p> Potrebbe essere un null pointer il proprietario. In quel caso stampo a schermo l'avviso, ma comunque l'opera
      * la affitta, anche se ad affittarla è un proprietario null.
      * @param operaDaAffittare Opera che è richiesta per l'affitto
-     * @param richiedente Il museo che richiede l'opera
+     * @param museoRichiedente Il museo che richiede l'opera
      */
 
     // TODO aggiusta questo metodo: deve impostare anche per i proprietari delle opere che vogliono fare opere con le
     //  proprie opere, e l'opera deve essere affittata solo se si ha la disponibilità economica di farlo.
-    public void affittaOperaAMuseo(Opera operaDaAffittare, Museo richiedente){
-        if(operaDaAffittare.getProprietario() != richiedente)
-            if(!operaDaAffittare.isBusy()) {
-                operaDaAffittare.affitta(richiedente);
-                try {
-                    // aggiungo il bilancio al proprietario dell'opera, se non è null
-                    operaDaAffittare.getProprietario().addBilancio(this, operaDaAffittare.getCostoNoleggio());
+    public void affittaOperaAMuseo(Opera operaDaAffittare, IncaricoMostra incaricoRichiedente, Museo museoRichiedente){
+        try {
+            if (!operaDaAffittare.isBusy()) {
+                if (operaDaAffittare.getProprietario() != museoRichiedente) {
+                    int costoOperaDaAffittare = operaDaAffittare.getCostoNoleggio();
+                    try {
+                        incaricoRichiedente.prelevaDenaro(this, costoOperaDaAffittare);
+                        operaDaAffittare.affitta(museoRichiedente);
+                        operaDaAffittare.getProprietario().addBilancio(this, operaDaAffittare.getCostoNoleggio());
+                    } catch (NullPointerException e) {
+                        System.err.println("Trovato proprietario null. I soldi per la transazione " +
+                                "dell'Opera sono andati perduti.");
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                    }
                 }
-                catch (NullPointerException e) {
-                    System.err.println("Trovato proprietario null");
+                else {
+                    operaDaAffittare.affitta(museoRichiedente);
                 }
-            }
+            }else
+                throw new Exception("L'opera è già noleggiata.");
+        }catch (Exception e) {System.err.println(e.getMessage());
+        }
     }
 
     /**

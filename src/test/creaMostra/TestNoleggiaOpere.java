@@ -5,6 +5,7 @@ import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
 import personale.pkgIncaricoMostra.Amministratore;
+import personale.pkgIncaricoMostra.IncaricoMostra;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +15,7 @@ public class TestNoleggiaOpere {
     private Opera operaDaAffittare;
     private Opera operaDaRestituire;
     private Amministratore amministratore;
+    private IncaricoMostra incaricoMostra;
 
     /**
      * testA è un'opera presente nel museo che è di un proprietario null, e cioè è un'opera affittabile.
@@ -29,14 +31,17 @@ public class TestNoleggiaOpere {
         amministratore = new Amministratore(museo);
     }
 
-    @Test
-    @DisplayName("Test verifica effettiva acquisizione")
-    public void testAffittoOpera(){
-        museo.setBilancio(amministratore, 500);
-        assertFalse(operaDaAffittare.isBusy());
-        assertEquals(operaDaAffittare.getProprietario(), operaDaAffittare.getAffittuario());
-        gestoreOpere.affittaOperaAMuseo(operaDaAffittare, museo);
-        assertEquals(operaDaAffittare.getAffittuario(), museo);
 
+    /**
+     * Verifico che tutte le Opere previste da un IncaricoMostra siano state affittate dal museo.
+     */
+    @Test
+    @DisplayName("Test verifica noleggio opere di un IncaricoMostra")
+    public void test(){
+        amministratore.setAmministratoreAutomatico(false);
+        museo.setBilancio(amministratore, 50000);
+        incaricoMostra = amministratore.forceStrategyExecution(2,14,false);
+        for(Opera o: incaricoMostra.getOpereMostra())
+            assertTrue(o.getAffittuario() == museo);
     }
 }

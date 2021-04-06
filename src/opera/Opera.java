@@ -44,11 +44,14 @@ public final class Opera {
     public Museo getAffittuario(){
         return museoInMostra;
     }
-    public boolean isBusy(){
+    public boolean isBusy() {
         return busyInQualcheMostra;
     }
     public int getCostoNoleggio(){
         return costoNoleggio;
+    }
+    public String getAutore(){
+        return autore;
     }
 
     /**

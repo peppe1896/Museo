@@ -2,6 +2,7 @@ package personale;
 
 import museo.Suggeritore;
 
+
 /**
  * La classe astratta che viene estesa in Organizzatore ed Impiegato.
  */

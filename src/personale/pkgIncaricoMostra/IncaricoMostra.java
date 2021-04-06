@@ -1,6 +1,7 @@
 package personale.pkgIncaricoMostra;
 
 import museo.Mostra;
+import opera.GestoreOpere;
 import opera.Opera;
 import personale.*;
 
@@ -73,14 +74,12 @@ public class IncaricoMostra extends Observable implements Incarico {
      * Preleva il denaro dal fondi stanziati per questa Mostra
      * @param denaroRichiesto Il denaro da prelevare
      */
-    public void prelevaDenaro(Object requester, int denaroRichiesto){
-        if(requester == organizzatore) {
-            try {
-                if (denaroRichiesto <= bilancio)
-                    bilancio -= denaroRichiesto;
-            } catch (Exception e) {
-                System.err.println("Non ci sono abbastanza fondi");
-            }
+    public void prelevaDenaro(Object requester, int denaroRichiesto) throws NoMoneyException{
+        if(requester == organizzatore || requester instanceof GestoreOpere) {
+            if (denaroRichiesto <= bilancio)
+                bilancio -= denaroRichiesto;
+            else
+                throw new NoMoneyException("Non ci sono abbastanza fondi");
         }
     }
 
@@ -90,7 +89,11 @@ public class IncaricoMostra extends Observable implements Incarico {
 
     @Override
     public boolean svolgiIncarico() {
-        System.out.println("La mostra è pronta. Ora è aperta ai visitatori");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~\nLa mostra è pronta e aperta ai visitatori! Sono presenti le seguenti opere:");
+        for(Opera opera: opereMostra){
+            System.out.println("\t"+opera.getNome() + " di " + opera.getAutore());
+        }
+        System.out.println("~~~~~~~~~~~~~~~~~~~~");
         return true;
     }
 

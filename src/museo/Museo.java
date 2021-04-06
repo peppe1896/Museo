@@ -1,23 +1,27 @@
 package museo;
 
+import museo.sale.Sala;
 import museo.sale.SalaFisica;
 import museo.sale.SalaVirtuale;
 import museo.ticket.Biglietto;
 import museo.ticket.TicketMostraFisica;
-import museo.ticket.TicketMostraVirtuale;
+import museo.ticket.TicketMostraFisicaEVirtuale;
 import opera.GestoreOpere;
 import opera.Opera;
 import personale.*;
 import personale.pkgIncaricoMostra.Amministratore;
+import visitatore.Acquirente;
 import visitatore.Visitatore;
+import visitatore.VisitatoreReg;
 
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class Museo extends Observable {
     private int costoBiglietto = 10;
     private int bilancio;
 
-    private List<Visitatore> listaVisitatori = new ArrayList<>();
+    private Map<String, VisitatoreReg> utentiRegistrati = new LinkedHashMap<>();
     private Map<String, ArrayList<TicketMuseo>> ticketMuseoVenduti;
     private Set<Opera> catalogoOpere;
     private List<Suggerimento> suggerimenti = new ArrayList<>();
@@ -54,8 +58,8 @@ public class Museo extends Observable {
 
         ticketMuseoVenduti = Map.of(
                 "Biglietto Base", new ArrayList<TicketMuseo>(),
-                "Ticket Mostra", new ArrayList<TicketMuseo>(),
-                "Ticket Virtuale", new ArrayList<TicketMuseo>()
+                "Ticket Fisica", new ArrayList<TicketMuseo>(),
+                "Ticket Fisica-Virtuale", new ArrayList<TicketMuseo>()
         );
 
         sale = List.of(new SalaFisica(5),
@@ -96,22 +100,60 @@ public class Museo extends Observable {
     public boolean vendiBigliettoMuseo(Visitatore visitatore) {
         boolean returns = false;
         if(visitatore.paga(costoBiglietto)) {
-            ticketMuseoVenduti.get("Biglietto Base").add(new Biglietto(visitatore));
+            TicketMuseo tmp = new Biglietto(visitatore);
+            ticketMuseoVenduti.get("Biglietto Base").add(tmp);
+            visitatore.addTicket(tmp);
             returns = true;
         }
-        listaVisitatori.add(visitatore);
+        registerVisitor(visitatore);
         return returns;
-        //TODO: implementare richiesta di registrazione se nuovo utente
     }
 
-    public boolean vendiTicketMostra(Visitatore visitatore, Mostra mostra){
-        if(visitatore.paga(mostra.getCostoBiglietto())){
-            mostra.addVisitatore(visitatore);
-            if(mostra.isVirtual())
-                ticketMuseoVenduti.get("Ticket Virtuale").add(new TicketMostraVirtuale(visitatore));
-            else
-                ticketMuseoVenduti.get("Ticket Mostra").add(new TicketMostraFisica(visitatore));
+    private boolean askForRegistration(){
+        if(75 > Math.random() * 100)
             return true;
+        return false;
+    }
+
+    private void registerVisitor(Visitatore visitatore){
+        if(askForRegistration()) {
+            Visitatore v = new VisitatoreReg(visitatore.getBilancio());
+            byte[] array = new byte[12];
+            new Random().nextBytes(array);
+            String randomString = new String(array, Charset.forName("ISO-8859-1"));
+            ((VisitatoreReg)v).setUsername(randomString);
+        }
+    }
+
+    /**
+     * Aggiunge alle Liste di Ticket il Ticket venduto.
+     * Mette il valore in Map<Ticket,List<Ticket>>, quindi mette il biglietto nella List mappata da tipo di Ticket.
+     * @param visitatore Il visitatore che sta comprando il biglietto.
+     * @param mostra
+     * @param postoVirtuale Indica se il visitatore vuole un posto virtuale.
+     * @return
+     */
+    public boolean vendiTicketMostraVirtuale(VisitatoreReg visitatore, Mostra mostra, boolean postoVirtuale) {
+        if (visitatore.paga(mostra.getCostoBiglietto())) { // il visitatore ha i soldi?
+            if (mostra.pagaIngresso(visitatore, postoVirtuale)) { // c'è il posto che il visitatore vuole? (virtuale o fisico)
+                if (mostra.isVirtual()) {
+                    TicketMuseo tmp = new TicketMostraFisicaEVirtuale(visitatore);
+                    ticketMuseoVenduti.get("Ticket Fisica-Virtuale").add(tmp);
+                    visitatore.addTicket(tmp);
+                    return true;
+                }
+            }
+        }return false;
+    }
+
+    public boolean vendiTicketMostraFisica(Visitatore visitatore, Mostra mostra){
+        if(visitatore.paga(mostra.getCostoBiglietto())){
+            if(mostra.pagaIngresso(visitatore, false)){
+                TicketMuseo tmp = new TicketMostraFisica(visitatore);
+                ticketMuseoVenduti.get("Ticket Fisica").add(tmp);
+                visitatore.addTicket(tmp);
+                return true;
+            }
         }
         return false;
     }
@@ -119,7 +161,7 @@ public class Museo extends Observable {
     public void registraSuggerimento(Suggerimento suggerimento){
         suggerimenti.add(suggerimento);
         setChanged();
-        notifyObservers(new StateMuseo(suggerimento, bilancio, loadFactorSale, null));
+        notifyObservers(new StatoMuseo(suggerimento, bilancio, loadFactorSale, null, false));
     }
 
     /**
@@ -155,23 +197,24 @@ public class Museo extends Observable {
         if(richiedente instanceof Amministratore) {
             this.bilancio = bilancio;
             setChanged();
-            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
+            notifyObservers(new StatoMuseo(null, bilancio, loadFactorSale, null, true));
         }
     }
 
-    public void addBilancio(Object richiedente, int incasso){
+    public void addBilancio(Object richiedente, int incasso) throws Exception{
         if(richiedente instanceof Organizzatore || richiedente instanceof Amministratore) {
             this.bilancio += incasso;
             setChanged();
-            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
+            notifyObservers(new StatoMuseo(null, bilancio, loadFactorSale, null, false));
         }
+        throw new Exception("Solo un Amministratore o un Organizzatore può aggiungere soldi al Bilancio del Museo");
     }
 
     public void prelevaBilancio(Object richiedente, int prelievo){
         if(richiedente instanceof Amministratore) {
             this.bilancio -= prelievo;
             setChanged();
-            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
+            notifyObservers(new StatoMuseo(null, bilancio, loadFactorSale, null, false));
         }
     }
 
@@ -248,11 +291,15 @@ public class Museo extends Observable {
         return gestoreOpere;
     }
 
+    /**
+     * Aggiunge una Mostra creata da un Organizzatore. Dice all'Amministratore che può creare un'altra Mostra.
+     * @param mostra
+     */
     public void addMostra(Mostra mostra){
         this.mostre.add(mostra);
         updateLoadFactorSale();
         setChanged();
-        notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, null));
+        notifyObservers(new StatoMuseo(null, bilancio, loadFactorSale, null, true));
     }
 
     public Set<Mostra> getMostre(){
@@ -267,10 +314,20 @@ public class Museo extends Observable {
         loadFactorSale = ((double) saleOccupate)/((double) sale.size());
     }
 
+    /**
+     * Viene chiamato dal metodo Organizzatore::chiudiMostra() che ha organizzato la sua Mostra.
+     * Toglie la Mostra dalla lista delle Mostre acquistabili. La Mostra, che è impostata come terminata.
+     * Manda all'Amministratore in ascolto la Mostra che è appena stata chiusa, così che lui la possa salvare
+     * tra le Mostre che sono state chiuse
+     * @param organizzatore Colui che ha organizzato una Mostra
+     * @param mostra La Mostra
+     */
     public void chiudiMostra(Organizzatore organizzatore, Mostra mostra){
         if(organizzatore == mostra.getOrganizzatore()){
+            StatoMuseo sm = new StatoMuseo(null, bilancio, loadFactorSale, mostra, false);
+            this.mostre.remove(mostra);
             setChanged();
-            notifyObservers(new StateMuseo(null, bilancio, loadFactorSale, mostra));
+            notifyObservers(sm);
         }
     }
 }

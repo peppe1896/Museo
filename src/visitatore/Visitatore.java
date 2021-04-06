@@ -1,10 +1,13 @@
 package visitatore;
 
 import museo.Suggeritore;
+import museo.TicketMuseo;
 
-public class Visitatore implements Suggeritore {
-    private int bilancio = 0;
+import java.util.ArrayList;
 
+public class Visitatore implements Suggeritore, Acquirente {
+    protected int bilancio = 0;
+    protected ArrayList<TicketMuseo> ticketsAcquistati = new ArrayList<>();
     public Visitatore(){}
     /**
      Chiamata da Museo per pagare
@@ -17,11 +20,19 @@ public class Visitatore implements Suggeritore {
         return false;
     }
 
+    public void addTicket(TicketMuseo ticketMuseo){
+        this.ticketsAcquistati.add(ticketMuseo);
+    }
+
     public Visitatore(int bilancio){
         this.bilancio = bilancio;
     }
 
     public void ottieniRimborso(int rimborso){
         this.bilancio += rimborso;
+    }
+
+    public int getBilancio(){
+        return bilancio;
     }
 }

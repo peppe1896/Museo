@@ -2,7 +2,7 @@ package personale;
 
 import museo.Mostra;
 import museo.Museo;
-import museo.Sala;
+import museo.sale.Sala;
 import opera.GestoreOpere;
 import opera.Opera;
 import personale.pkgIncaricoImpiegato.CreaPubblicità;
@@ -54,8 +54,10 @@ public class Organizzatore extends Personale implements Observer {
     private void organizzaMostra(){
         boolean ancheVirtuale = incaricoAttuale.isAncheVirtuale();
         scegliImpiegati(ancheVirtuale);
-        pagaImpiegati();
-        affittaOpere();
+        pagaPersonale();
+        try {
+            affittaOpere();
+        } catch (Exception e){System.err.println(e.getMessage());}
         assegnaCompiti(ancheVirtuale);
         setMostra(ancheVirtuale);
         museo.addMostra(incaricoAttuale.getMostra());
@@ -73,36 +75,45 @@ public class Organizzatore extends Personale implements Observer {
         else
             numeroImpiegatiRichiesti = 3;
         ArrayList<Personale> impiegati = new ArrayList<>();
-        for(Personale p:museo.getImpiegati(true))
-            if(impiegati.size() < numeroImpiegatiRichiesti)
-                if(!p.isBusy()){
+        for(Personale p:museo.getImpiegati(true)) {
+            if (impiegati.size() < numeroImpiegatiRichiesti) {
+                if (!p.isBusy()) {
                     p.setBusy();
                     impiegati.add(p);
                 }
+            }
+        }
         incaricoAttuale.setImpiegati(impiegati);
     }
 
     /**
      * Affitta le opere pagando il prezzo di noleggio
      */
-    private void affittaOpere(){
+    private void affittaOpere() throws Exception{/*
         GestoreOpere gestoreOpere = museo.getGestoreOpere();
         for(Opera opera:incaricoAttuale.getOpereMostra()) {
             gestoreOpere.affittaOperaAMuseo(opera, museo);
             incaricoAttuale.prelevaDenaro(this, opera.getCostoNoleggio());
-        }
+        }*/
+        for(Opera opera:incaricoAttuale.getOpereMostra())
+            if(!opera.isBusy())
+                if(opera.getAffittuario()!=museo)
+                    throw new Exception("Attenzione! " + opera.getNome() + " non è stata affittata");
     }
 
     /**
      * Pago gli impiegati e l'organizzatore: 10 gli impiegati e 20 l'organizzatore.
+     * Può lanciare l'eccezione NoMoneyException
      */
-    private void pagaImpiegati(){
-        this.pagami(20);
-        incaricoAttuale.prelevaDenaro(this, 20);
-        for(Personale p:incaricoAttuale.getImpiegati()) {
-            p.pagami(10);
-            incaricoAttuale.prelevaDenaro(this, 10);
-        }
+    private void pagaPersonale(){
+        try{
+            incaricoAttuale.prelevaDenaro(this, 20);
+            this.pagami(20);
+            for(Personale p:incaricoAttuale.getImpiegati()) {
+                incaricoAttuale.prelevaDenaro(this, 10);
+                p.pagami(10);
+            }
+        } catch (Exception e){}
     }
 
     /**
@@ -141,24 +152,29 @@ public class Organizzatore extends Personale implements Observer {
         mostra.addObserver(this);
         int rimanenze = incaricoAttuale.getBilancio();
         mostra.incassa(rimanenze);
-        incaricoAttuale.prelevaDenaro(this, rimanenze);
-        museo.addMostra(mostra);
+        try {
+            incaricoAttuale.prelevaDenaro(this, rimanenze);
+        }catch (Exception e){;}
         calcolaCostoIngresso(ancheVirtuale);
         mostra.setOpereMostra(incaricoAttuale.getOpereMostra());
+        museo.addMostra(mostra);
     }
 
     /**
      * Per calcolare il costo di ingresso elaboro quale sia la combinazione di Sale che posso avere e
      * in base a quello calcolo i soldi che deve costare il biglietto per rientrare con le spese.
      * Per ottenere quanti soldi sono stati spesi vedo il valore dei fondiStaziati e vedo quanti soldi sono rimasti
-     * in Mostra.
+     * in Mostra. Ogni Stanza può esporre un'Opera di quelle affittate, che sia SalaFisica o SalaVirtuale.
      */
     private void calcolaCostoIngresso(boolean ancheVirtuale){
         Mostra mostra = incaricoAttuale.getMostra();
         List<Sala> saleMuseo = museo.getSale(ancheVirtuale);
         Set<Sala> saleMostra = new HashSet<>();
-        for(int i=0;i<4;i++){
-            saleMostra.add(saleMuseo.get((i)));
+        Iterator<Sala> iterator = saleMuseo.iterator();
+        int i = 0;
+        while(iterator.hasNext() && i < incaricoAttuale.getOpereMostra().size()){
+            saleMostra.add(iterator.next());
+            i++;
         }
         int count = 0;
         for(Sala s:saleMostra) {
@@ -167,7 +183,7 @@ public class Organizzatore extends Personale implements Observer {
         }
         int fondiStanziati = incaricoAttuale.getFondiStanziati();
         int rimanenzaFondiStanziati = fondiStanziati - mostra.getIncasso();
-        int costoBiglietto = rimanenzaFondiStanziati/count;
+        int costoBiglietto = (int)((double)rimanenzaFondiStanziati/(double)count);
         costoBiglietto += 5;
         mostra.setPostiTotali(count);
         mostra.setSale(saleMostra, ancheVirtuale);
@@ -196,13 +212,17 @@ public class Organizzatore extends Personale implements Observer {
                 pp.setIncaricoImpiegato(null);
             }catch (Exception e){}
         }
-        mostra.deleteObserver(this);
-        museo.addBilancio(this, mostra.svuotaCasse());
+
+        try {
+            museo.addBilancio(this, mostra.svuotaCasse());
+        }catch (Exception e){}
         Set<Sala> saleMostra = mostra.getSale();
         for(Sala sala: saleMostra)
             sala.freeSala();
         this.setFree();
         mostra.setTerminata();
+        mostra.deleteObserver(this);
+        museo.chiudiMostra(this, mostra);
     }
 
     /**
@@ -242,8 +262,8 @@ public class Organizzatore extends Personale implements Observer {
         if(o != m)
             chiusuraForzata();
         // altrimenti è la Mostra che si sta osservando.
-        else {
-               chiudiMostra();
-            }
+        else
+            chiudiMostra();
+
     }
 }

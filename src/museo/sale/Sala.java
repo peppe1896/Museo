@@ -1,4 +1,4 @@
-package museo;
+package museo.sale;
 
 public abstract class Sala {
     protected int postiSala;
