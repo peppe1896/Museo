@@ -5,7 +5,7 @@ import personale.IncaricoImpiegato;
 public class PulizieSalaFisica extends IncaricoImpiegato {
     @Override
     public boolean svolgiIncarico() {
-        System.out.println("Pulizie fatte");
+        System.out.print("Pulizie fatte-");
         return true;
     }
 }

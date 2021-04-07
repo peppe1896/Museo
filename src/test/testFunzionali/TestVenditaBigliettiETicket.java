@@ -1,11 +1,10 @@
-package test;
+package test.testFunzionali;
 
 import museo.Mostra;
 import museo.Museo;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import opera.GestoreOpere;
+import org.junit.jupiter.api.*;
 import personale.NoMoneyException;
 import personale.pkgIncaricoMostra.Amministratore;
 import visitatore.Visitatore;
@@ -16,9 +15,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Testo dai casi base della semplice vendita per vedere se funziona il sistema di pagamento ingresso.
- * Provo come i Visitatori possano registrarsi e come possano scegliere una preferenza sui posti se sono registrati.
- * Verifico anche che le Mostre che sono state riempite siano state chiuse in automatico.
+ * Con questa classe di Test verifico che si possano vendere i biglietti per le mostre che sono state
+ * create. Preciso che le Mostre a cui i Visitatori accedono sono create in automatico tramite le
+ * strategie automatiche della classe Amministratore, che grazie al dialogo che ha con il Museo, riesce a capire
+ * quando deve creare una nuova Mostra. Può anche Distruggere una Mostra avviata o in fase di Avvio, ma questo
+ * è mostrato in altri Test.
  */
 public class TestVenditaBigliettiETicket {
     private Museo museo;
@@ -107,5 +108,11 @@ public class TestVenditaBigliettiETicket {
             museo.vendiTicketMostraVirtuale(entry.getValue(), m, true);
         }
         assertTrue(m.isTerminata());
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

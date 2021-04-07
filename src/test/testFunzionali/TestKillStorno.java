@@ -1,10 +1,9 @@
-package test;
+package test.testFunzionali;
 
 import museo.Mostra;
 import museo.Museo;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import opera.GestoreOpere;
+import org.junit.jupiter.api.*;
 import personale.pkgIncaricoMostra.Amministratore;
 import personale.pkgIncaricoMostra.IncaricoMostra;
 import visitatore.Visitatore;
@@ -38,7 +37,9 @@ public class TestKillStorno {
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore, 6000);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
-        incaricoMostra = amministratore.forceStrategyExecution(2, 10, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
         assertTrue(amministratore.getLoadFactorSale() > 0.9);
         mostra = incaricoMostra.getMostra();
         amministratore.update(null, null);
@@ -60,7 +61,9 @@ public class TestKillStorno {
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore, 6000);
         incaricoMostra1 = amministratore.forceStrategyExecution(2, 20, true);
-        incaricoMostra = amministratore.forceStrategyExecution(2, 15, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
+        incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
         assertTrue(amministratore.getLoadFactorSale() > 0.9);
 
         mostra = incaricoMostra1.getMostra();
@@ -77,5 +80,11 @@ public class TestKillStorno {
         assertEquals(0, visitatori[0].getBilancio());
         amministratore.update(null, null);
         assertEquals(costoMenoTrattenuta, visitatori[0].getBilancio());
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

@@ -1,4 +1,4 @@
-package test.creaMostra;
+package test.testFunzionali.creaMostra;
 
 
 import museo.Mostra;
@@ -15,6 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Se questo test fallisce è perché alcune opere che si stanno cercando di prendere
+ */
 public class TestStrategyIncaricoMostra {
     private Museo museo;
     private Amministratore amministratore;
@@ -84,11 +87,11 @@ public class TestStrategyIncaricoMostra {
     @Test
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
     public void testStrategyAuto(){
-        museo.setBilancio(amministratore, 500);
         amministratore.setAmministratoreAutomatico(false);
+        museo.setBilancio(amministratore, 500);
         Visitatore v = new Visitatore(100);
-        Opera opera1 = gestoreOpere.getOperaNome("TestA");
-        Opera opera2 = gestoreOpere.getOperaNome("TestB");
+        Opera opera1 = gestoreOpere.getOperaNome("TestY");
+        Opera opera2 = gestoreOpere.getOperaNome("TestZ");
         for(int i=0;i<5;i++) {
             museo.registraSuggerimento(new Suggerimento(opera1, v));
             museo.registraSuggerimento(new Suggerimento(opera2, v));
@@ -110,5 +113,11 @@ public class TestStrategyIncaricoMostra {
         assertFalse(m.isTerminata());
         amministratore.forceStrategyExecution(0);
         assertTrue(m.isTerminata());
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

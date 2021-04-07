@@ -1,64 +1,118 @@
 package opera;
 
 import museo.Museo;
-import personale.NoMoneyException;
 import personale.pkgIncaricoMostra.IncaricoMostra;
 
 import java.util.Set;
 
+/**
+ * Contiene il Field static e public con un set di Opere immutabile. Anche le Opere sono oggetti Immutabili:
+ * infatti non possono essere costruite fuori da questo package, e l'unica classe che le costruisce è questa.
+ */
 public final class GestoreOpere {
-    private static Set<Opera> catalogoOpere;
+    public final static Set<Opera> catalogoOpere = Set.of(
+            new Opera("La Gioconda", "Leonardo Da Vinci", null, 50),
+            new Opera("Notte Stellata", "V. Van Gogh", null, 50),
+            new Opera("La Persistenza della Memoria", "Salvador Dalì", null, 50),
+            new Opera("L'Urlo", "Edvard Munch", null, 50),
+            new Opera("La Ragazza con l'Orecchino di Perla", "Jean Vermeer", null, 50),
+            new Opera("L'Urlo", "Edvard Munch", null, 50),
+            new Opera("La Nascita di Venere", "Sandro Botticelli", null, 50),
+            new Opera("La Venere di Urbino", "Tiziano", null, 50),
+            new Opera("American Gothic", "Grant Wood", null, 50),
+            new Opera("Olympia", "Edouart Manet", null, 50),
+            new Opera("Ophelia", "John Everett Millais", null, 50),
+            new Opera("TestA", "Giuseppe", null, 50),
+            new Opera("TestB", "Giuseppe", null, 50),
+            new Opera("TestC", "Giuseppe", null, 50),
+            new Opera("TestD", "Giuseppe", null, 50),
+            new Opera("TestE", "Giuseppe", null, 50),
+            new Opera("TestF", "Giuseppe", null, 50),
+            new Opera("TestG", "Giuseppe", null, 50),
+            new Opera("TestH", "Giuseppe", null, 50),
+            new Opera("TestI", "Giuseppe", null, 50),
+            new Opera("TestL", "Giuseppe", null, 50),
+            new Opera("TestM", "Giuseppe", null, 50),
+            new Opera("TestN", "Giuseppe", null, 50),
+            new Opera("TestO", "Giuseppe", null, 50),
+            new Opera("TestP", "Giuseppe", null, 50),
+            new Opera("TestR", "Giuseppe", null, 50),
+            new Opera("TestS", "Giuseppe", null, 50),
+            new Opera("TestT", "Giuseppe", null, 50),
+            new Opera("TestU", "Giuseppe", null, 50),
+            new Opera("TestV", "Giuseppe", null, 50),
+            new Opera("TestW", "Giuseppe", null, 50),
+            new Opera("TestX", "Giuseppe", null, 50),
+            new Opera("TestY", "Giuseppe", null, 50),
+            new Opera("TestZ", "Giuseppe", null, 50),            new Opera("TestA", "Giuseppe", null, 50),
+            new Opera("TestAB", "Giuseppe", null, 50),
+            new Opera("TestAC", "Giuseppe", null, 50),
+            new Opera("TestAD", "Giuseppe", null, 50),
+            new Opera("TestAE", "Giuseppe", null, 50),
+            new Opera("TestAF", "Giuseppe", null, 50),
+            new Opera("TestAG", "Giuseppe", null, 50),
+            new Opera("TestAH", "Giuseppe", null, 50),
+            new Opera("TestAI", "Giuseppe", null, 50),
+            new Opera("TestAL", "Giuseppe", null, 50),
+            new Opera("TestAM", "Giuseppe", null, 50),
+            new Opera("TestAN", "Giuseppe", null, 50),
+            new Opera("TestAO", "Giuseppe", null, 50),
+            new Opera("TestAP", "Giuseppe", null, 50),
+            new Opera("TestAR", "Giuseppe", null, 50),
+            new Opera("TestAS", "Giuseppe", null, 50),
+            new Opera("TestAT", "Giuseppe", null, 50),
+            new Opera("TestAU", "Giuseppe", null, 50),
+            new Opera("TestAV", "Giuseppe", null, 50),
+            new Opera("TestAW", "Giuseppe", null, 50),
+            new Opera("TestAX", "Giuseppe", null, 50),
+            new Opera("TestAY", "Giuseppe", null, 50),
+            new Opera("TestAZ", "Giuseppe", null, 50),
+            new Opera("TestSuggerimento", "Giuseppe", null, 0)
+    );
 
     /**
-     * Inizializza un gestore opere, che serve per lo sharing delle opere tra vari musei.
-     * Il costruttore del museo crea l'unico GestoreOpere che dovrebbe esistere, e ogni volta
-     * che qualcuno deve usare qualche opera, usa il metodo del Museo getGestoreOpere() e poi
-     * usa lo stesso GestoreOpere per chiedere Opere, restituirle, affittarle e cambiare le parti
-     * dello stato dell'opera che si possono cambiare, quale l'utilizzatore e la disponibilità.
+     * Ogni GestoreOpere ha lo stesso catalogo di opere. Ogni museo ha un GestoreOpere e ogni museo può quindi avere
+     * noleggiare opere. Per i test ho questo costruttore. Per gli altri, ho il metodo setProprietario
+     * che è di questa classe, e che può permettere di cambiare proprietario a un'opera se quell'opera
+     * gli appartiene. Originariamente tutti i proprietari sono null.
      * @param museo Serve solo per avere due diversi proprietari per diverse opere.
      */
     public GestoreOpere(Museo museo){
-        catalogoOpere = Set.of(
-                new Opera("La Gioconda", "Leonardo Da Vinci", null, 50),
-                new Opera("Notte Stellata", "V. Van Gogh", null, 50),
-                new Opera("La Persistenza della Memoria", "Salvador Dalì", null, 50),
-                new Opera("L'Urlo", "Edvard Munch", null, 50),
-                new Opera("La Ragazza con l'Orecchino di Perla", "Jean Vermeer", museo, 50),
-                new Opera("L'Urlo", "Edvard Munch", museo, 50),
-                new Opera("La Nascita di Venere", "Sandro Botticelli", museo, 50),
-                new Opera("La Venere di Urbino", "Tiziano", museo, 50),
-                new Opera("American Gothic", "Grant Wood", museo, 50),
-                new Opera("Olympia", "Edouart Manet", museo, 50),
-                new Opera("Ophelia", "John Everett Millais", museo, 50),
-                new Opera("TestA", "Giuseppe", null, 50),
-                new Opera("TestB", "Giuseppe", null, 50),
-                new Opera("TestC", "Giuseppe", null, 50),
-                new Opera("TestD", "Giuseppe", null, 50),
-                new Opera("TestE", "Giuseppe", null, 50),
-                new Opera("TestF", "Giuseppe", null, 50),
-                new Opera("TestG", "Giuseppe", null, 50),
-                new Opera("TestH", "Giuseppe", null, 50),
-                new Opera("TestI", "Giuseppe", null, 50),
-                new Opera("TestL", "Giuseppe", null, 50),
-                new Opera("TestM", "Giuseppe", null, 50),
-                new Opera("TestN", "Giuseppe", null, 50),
-                new Opera("TestO", "Giuseppe", null, 50),
-                new Opera("TestP", "Giuseppe", null, 50),
-                new Opera("TestR", "Giuseppe", null, 50),
-                new Opera("TestS", "Giuseppe", null, 50),
-                new Opera("TestT", "Giuseppe", null, 50),
-                new Opera("TestU", "Giuseppe", null, 50),
-                new Opera("TestV", "Giuseppe", null, 50),
-                new Opera("TestW", "Giuseppe", null, 50),
-                new Opera("TestX", "Giuseppe", null, 50),
-                new Opera("TestY", "Giuseppe", null, 50),
-                new Opera("TestZ", "Giuseppe", null, 50),
-                new Opera("TestSuggerimento", "Giuseppe", museo, 0)
-        );
+        boolean pari = true;
+        for(Opera o:catalogoOpere){
+            if(pari){
+                o.setProprietario(museo);
+                pari = !pari;
+            }else{
+                pari = !pari;
+            }
+        }
+        Opera a = this.getOperaNome("TestA");
+        a.setProprietario(null);
+        a = this.getOperaNome("TestB");
+        a.setProprietario(null);
+        a = this.getOperaNome("TestY");
+        a.setProprietario(null);
+        a = this.getOperaNome("TestZ");
+        a.setProprietario(null);
     }
 
+    public GestoreOpere(){}
     /**
-     * Previene che le opere possano venire copiate
+     * Creo un GestoreOpere che prevede due Musei, e che assegna due proprietari.
+     * @param a
+     * @param b
+     */
+    public GestoreOpere(Museo a, Museo b){
+        this(a);
+        for(Opera o:catalogoOpere)
+            if(o.getProprietario() != a)
+                o.setProprietario(b);
+    }
+    /**
+     * Grazie al Set Immutabile e al fatto che anche le opere sono immutabili, sono sicuro di poter passare
+     * il set a chiunque lo richieda. Le uniche modifiche alle opere possono essere fatte dall'oggetto GestoreOpere,
+     * essendo l'unico oggetto presente nel package di Opera.
      * @return
      */
     public Set<Opera> getCatalogoOpere(){
@@ -76,8 +130,6 @@ public final class GestoreOpere {
      * @param museoRichiedente Il museo che richiede l'opera
      */
 
-    // TODO aggiusta questo metodo: deve impostare anche per i proprietari delle opere che vogliono fare opere con le
-    //  proprie opere, e l'opera deve essere affittata solo se si ha la disponibilità economica di farlo.
     public void affittaOperaAMuseo(Opera operaDaAffittare, IncaricoMostra incaricoRichiedente, Museo museoRichiedente){
         try {
             if (!operaDaAffittare.isBusy()) {
@@ -121,5 +173,16 @@ public final class GestoreOpere {
             if(o.getNome().equals(nomeOpera))
                 return o;
         return null;
+    }
+
+    /**
+     * Usato per ripristinare i test. Reimposta il catalogo opere.
+     */
+    public void resetAllOpere(){
+        for(Opera o:catalogoOpere){
+            o.setProprietario(null);
+            restituisciOperaAffittata(o);
+        }
+        Set<Opera> setCheck = catalogoOpere;
     }
 }

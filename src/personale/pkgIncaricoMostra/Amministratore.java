@@ -6,7 +6,7 @@ import museo.StatoMuseo;
 import museo.Suggerimento;
 import opera.Opera;
 import personale.Organizzatore;
-import test.creaMostra.TestStrategyIncaricoMostra;
+import test.testFunzionali.creaMostra.TestStrategyIncaricoMostra;
 
 import java.util.*;
 
@@ -30,7 +30,7 @@ public class Amministratore implements Observer {
     private double loadFactorSale = 0.f;
     private List<Mostra> mostreChiuse = new ArrayList<>();
     private boolean goAutomatico = true;
-    private boolean semaphoreForStrategies = true;
+    private boolean semaphoreForCreationalStrategies = true;
     private boolean lockCreationIncaricoMostre = false;
     private int countSuggest = 0;
     private int rotations = 0;
@@ -38,6 +38,7 @@ public class Amministratore implements Observer {
     /**
      * Il costruttore dell'Amministratore costruisce la LinkedHashMap prendendolo dal Catalogo delle opere
      * condiviso tra tutti i Musei.
+     * Imposta inoltre la strategia di base.
      *
      * @param museo serve per impostare il museo che deve amministrare.
      */
@@ -54,15 +55,29 @@ public class Amministratore implements Observer {
     }
 
     /**
-     * Aggiorna il suo stato con lo StateMuseo che viene passato come parametro.
-     * Lo StateMuseo viene creato ogni volta che cambia il loadFactorSale, per avviare la strategia
-     * di kill delle Mostre, ogni volta che viene creato un suggerimento e ogni volta che viene aggiornato il bilancio
-     * <p>
-     * Se ho una strategy KillMostre vuol dire che ho un fattore di carico elevato e quindi voglio attivare la pulizia
-     * delle Mostre. Altrimenti se la strategia non è cambiata non creo altre Mostre.
+     * Sceglie in base allo stato del Museo allo stato degli Incarichi generati la Strategia da prendere.
+     * Più specficatamente: aggiorna lo stato prendendo quello del Museo tramite la gestione di oggetti
+     * StatoMuseo, gestisce gli input esterni (impostati dal metodo forceStrategy) usando la flag speciale
+     * strongRestart. La strategia viene impostata dopo che l'Amministratore aggiorna lo stato.
      *
-     * @param o   è sempre il Museo
-     * @param arg StateMuseo.
+     * Questa funzione si pu vedere come due blocchi:
+     * - Aggiorno lo stato
+     * - Faccio un'azione (se goAutomatico è true)
+     *
+     * Nell'ultima parte ho semplicemente un counter per alleggerire le strutture dati.
+     *
+     * Nella fase di scelta aggiorno il semaforo, e faccio l'azione in conseguenza allo stato e al semaforo.
+     * Il semaforo: se verde(true) vuol dire che posso impostare una strategia creazionale;
+     * se giallo(false) o rosso(false), nel setStrategy scelgo cosa fare, cioè se aspettare (IdleStrategy)
+     * oppure ridurre il loadFactorSale tramite la chiusura forzata (KillMostreStrategy) di una o più mostre.
+     *
+     * E' presente il lockCreation che è una flag che viene impostata true quando inizio la creazione
+     * di un nuovo IncaricoMostra. Se così non fosse, essendo che la procedura di costruzione di una Mostra
+     * prevede il dialogo con il Museo, e che questo dialogo causa il trigger di questo Observer, si avrebbe che
+     * nella creazione di una Mostra, si creerebbero almeno 3 Incarichi. Questo implica che ci sarebbero altri
+     * dialoghi tra Museo e Incarico, causando uno stack overflow.
+     * @param o  Museo | null
+     * @param arg StatoMuseo | null
      */
     @Override
     public void update(Observable o, Object arg) {
@@ -70,7 +85,7 @@ public class Amministratore implements Observer {
         boolean strongRestart = false;
 
         // UPDATE STATO MUSEO
-        if (arg != null) {
+        if (o == museo && arg != null) {
             StatoMuseo sm = (StatoMuseo) arg;
             Suggerimento suggerimento = sm.getOperaSuggerita();
             Integer bilancioMuseoState = sm.getBilancioMuseo();
@@ -94,18 +109,21 @@ public class Amministratore implements Observer {
             }
             if (mostra != null) {
                 mostreChiuse.add(mostra);
-                ((KillMostreStrategy) killMostreStrategy).setReady();
-                needAdminOp = false;
+                checkForLockToBeReleased();
+                needAdminOp = true;
             }
             if (museoIsReady != null) {
-                lockCreationIncaricoMostre = false;
+                checkForLockToBeReleased();
                 needAdminOp = true;
             }
             bilancioMuseo = museo.getBilancio(this);
-        } else {
-            // L'observer pull forza la richiesta di eseguire l'azione. Inoltre è  chiamato da setBilancio del Museo
+        }
+        else if (o == null && arg == null) {
             strongRestart = true;
+        }else{
             bilancioMuseo = museo.getBilancio(this);
+            loadFactorSale = museo.getLoadFactorSale(this);
+            needAdminOp = true;
         }
         // CHECK SUGGERIMENTI
         if (countSuggest > 9) {
@@ -125,7 +143,7 @@ public class Amministratore implements Observer {
             // se ho il semaforo false (cioè Giallo o Rosso), allora calcolo la strategia, e se la
             // strategia è kill verifico che non stia già uccidendo qualche altra mostra.
             if (goAutomatico && needAdminOp) {
-                if (!semaphoreForStrategies) {
+                if (!semaphoreForCreationalStrategies) {
                     setStrategy();
                     boolean killerIsReady = ((KillMostreStrategy) killMostreStrategy).isReady();
                     if (strategy instanceof KillMostreStrategy && !killerIsReady) {
@@ -157,6 +175,25 @@ public class Amministratore implements Observer {
     }
 
     /**
+     * Conto le mostre che ho nel museo, e conto quelle che dovrebbero essere attive. Se questi due non corrispondono
+     * è probabile che l'Update è stato chiamato da un Museo in fase di modifica.
+     */
+    private void checkForLockToBeReleased(){
+        int expectedMostreVive = 0;
+        int expectedMostreMorte = 0;
+        for(IncaricoMostra incaricoMostra : incarichiCreati){
+            if(incaricoMostra.isKillable())
+                expectedMostreVive++;
+            else
+                expectedMostreMorte++;
+        }
+        if(museo.getMostre().size() == expectedMostreVive && mostreChiuse.size() == expectedMostreMorte) {
+            lockCreationIncaricoMostre = false;
+            ((KillMostreStrategy)killMostreStrategy).setReady();
+        }
+    }
+
+    /**
      * Il semaforo rosso (false) mette in pausa l'amministratore. Con il semaforo rosso, l'Amministratore
      * può solamente killare o stare in idle.
      */
@@ -164,9 +201,9 @@ public class Amministratore implements Observer {
         int incarichiAttivi = museo.getMostre().size();
 
         if(incarichiAttivi < 2 && loadFactorSale < 0.65) // semaforo verde
-            semaphoreForStrategies = true;
+            semaphoreForCreationalStrategies = true;
         else
-            semaphoreForStrategies = false;
+            semaphoreForCreationalStrategies = false;
     }
 
     /**
@@ -176,7 +213,7 @@ public class Amministratore implements Observer {
      */
     public void loadSuggerimentiPerOpera(Object requester){
         if(requester instanceof TestStrategyIncaricoMostra || requester instanceof Amministratore)
-        suggerimentiPerOpera = new LinkedHashMap<>();
+            suggerimentiPerOpera = new LinkedHashMap<>();
         for(Opera o: museo.getCatalogoOpere())
             suggerimentiPerOpera.put(o,0);
     }
@@ -187,7 +224,7 @@ public class Amministratore implements Observer {
      * del museo.
      */
     private void setStrategy(){
-        if(!semaphoreForStrategies){ // semaforo ROSSO
+        if(!semaphoreForCreationalStrategies){ // semaforo ROSSO
             if (loadFactorSale > 0.9)
                 strategy = killMostreStrategy;
             else    // semaforo GIALLO
@@ -199,11 +236,11 @@ public class Amministratore implements Observer {
             } else {
                 if (bilancioMuseo < 1000)
                     strategy = idleStrategy;
-                if (1000 <= bilancioMuseo && bilancioMuseo < 2500)
+                else if (1000 <= bilancioMuseo && bilancioMuseo < 2500)
                     strategy = new LowBudgetStrategy();
-                if (2500 <= bilancioMuseo && bilancioMuseo < 5000)
+                else if (2500 <= bilancioMuseo && bilancioMuseo < 5000)
                     strategy = new PersonalStrategy(5, true);
-                if (5000 <= bilancioMuseo && bilancioMuseo < 10000)
+                else if (5000 <= bilancioMuseo && bilancioMuseo < 10000)
                     strategy = new PersonalStrategy(7, false);
                 else
                     strategy = idleStrategy;

@@ -6,7 +6,7 @@ public class spostareOpera extends IncaricoImpiegato {
 
     @Override
     public boolean svolgiIncarico() {
-        System.out.println("Opera spostata");
+        System.out.print("Opera spostata-");
         return true;
     }
 }

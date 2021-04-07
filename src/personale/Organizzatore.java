@@ -60,8 +60,9 @@ public class Organizzatore extends Personale implements Observer {
         } catch (Exception e){System.err.println(e.getMessage());}
         assegnaCompiti(ancheVirtuale);
         setMostra(ancheVirtuale);
-        museo.addMostra(incaricoAttuale.getMostra());
         svolgiCompitiImpiegati();
+        museo.addMostra(incaricoAttuale.getMostra());
+
     }
 
     /**
@@ -89,12 +90,7 @@ public class Organizzatore extends Personale implements Observer {
     /**
      * Affitta le opere pagando il prezzo di noleggio
      */
-    private void affittaOpere() throws Exception{/*
-        GestoreOpere gestoreOpere = museo.getGestoreOpere();
-        for(Opera opera:incaricoAttuale.getOpereMostra()) {
-            gestoreOpere.affittaOperaAMuseo(opera, museo);
-            incaricoAttuale.prelevaDenaro(this, opera.getCostoNoleggio());
-        }*/
+    private void affittaOpere() throws Exception{
         for(Opera opera:incaricoAttuale.getOpereMostra())
             if(!opera.isBusy())
                 if(opera.getAffittuario()!=museo)
@@ -201,8 +197,6 @@ public class Organizzatore extends Personale implements Observer {
      * Stacca l'observer, e resetta le Sale.
      */
     private void chiudiMostra(){
-        if(incaricoAttuale.isKillable())
-            incaricoAttuale.kill();
         Mostra mostra = incaricoAttuale.getMostra();
         GestoreOpere gestoreOpere = museo.getGestoreOpere();
         for(Opera o: incaricoAttuale.getOpereMostra())
@@ -213,9 +207,7 @@ public class Organizzatore extends Personale implements Observer {
                 pp.setIncaricoImpiegato(null);
             } catch (Exception e) { }
         }
-        try {
-            museo.addBilancio(this, mostra.svuotaCasse());
-        }catch (Exception e){}
+
         Set<Sala> saleMostra = mostra.getSale();
         for(Sala sala: saleMostra)
             sala.freeSala();
@@ -223,6 +215,7 @@ public class Organizzatore extends Personale implements Observer {
         mostra.setTerminata();
         mostra.deleteObserver(this);
         museo.chiudiMostra(this, mostra);
+        incaricoAttuale.kill();
     }
 
     /**
@@ -264,6 +257,5 @@ public class Organizzatore extends Personale implements Observer {
         // altrimenti è la Mostra che si sta osservando.
         else
             chiudiMostra();
-
     }
 }

@@ -1,4 +1,4 @@
-package test.creaMostra;
+package test.testFunzionali.creaMostra;
 
 import museo.Museo;
 import opera.GestoreOpere;
@@ -60,5 +60,11 @@ public class TestNoleggiaOpere {
             if(o.getAffittuario() == museo)
                 count++;
         assertFalse(count == numeroOperePreviste);
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

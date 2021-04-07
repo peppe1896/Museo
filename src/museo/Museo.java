@@ -27,16 +27,21 @@ public class Museo extends Observable {
     private List<Suggerimento> suggerimenti = new ArrayList<>();
     private List<Personale> personale = new ArrayList<>();
     private GestoreOpere gestoreOpere;
-    private List<Sala> sale = new ArrayList<>();
+    private List<Sala> sale;
     private Set<Mostra> mostre = new LinkedHashSet<>();
 
     private double loadFactorSale = 0.f;
     /**
      * <h2>Costruttori</h2>
      */
+
+    /**
+     * Questo costruttore di Base costruisce creando un Set immutabile di Sale di diverso tipo.
+     * Più Musei condividono lo stesso catalogo di Opere, così che possano noleggiarsele tra di loro.
+     */
     public Museo(){
         gestoreOpere = new GestoreOpere(this);
-        catalogoOpere = gestoreOpere.getCatalogoOpere();
+        catalogoOpere = gestoreOpere.catalogoOpere;
 
         personale.add(new Impiegato());
         personale.add(new Impiegato());
@@ -88,11 +93,6 @@ public class Museo extends Observable {
                 new SalaFisica(5),
                 new SalaVirtuale(15)
         );
-
-    }
-
-    public Museo(Set<Opera> catalogoOpere){
-        this.catalogoOpere = catalogoOpere;
     }
 
     /**
@@ -139,15 +139,13 @@ public class Museo extends Observable {
      * @param registrazioneAutomatica Se si sta effettuando una registrazione automatica
      */
     private void registerVisitor(Acquirente visitatore, boolean registrazioneAutomatica){
-        if(registrazioneAutomatica){
-            if(askForRegistration()) {
+        if(registrazioneAutomatica && askForRegistration()){
                 Visitatore vreg = new VisitatoreReg(visitatore.getBilancio());
                 byte[] array = new byte[12];
                 new Random().nextBytes(array);
                 String randomString = new String(array, Charset.forName("ISO-8859-1"));
                 ((VisitatoreReg)vreg).setUsername(randomString);
                 utentiRegistrati.put(randomString, (VisitatoreReg)vreg);
-            }
         }else{
             Visitatore vreg = new VisitatoreReg(visitatore.getBilancio());
             byte[] array = new byte[12];
@@ -158,12 +156,20 @@ public class Museo extends Observable {
         }
     }
 
+    /**
+     * Registra un visitatore in modo manuale. Per farlo in modo automatico è presente
+     * la funzione registerVisitor, che è privata, e che fa la registrazione di un Visitatore del Museo con probabilità
+     * del 60%
+     *
+     * @param visitatore
+     */
     public void registraVisitatore(Acquirente visitatore){
         registerVisitor(visitatore, false);
     }
     /**
      * Aggiunge alle Liste di Ticket il Ticket venduto.
      * Mette il valore in Map<Ticket,List<Ticket>>, quindi mette il biglietto nella List mappata da tipo di Ticket.
+     * Aggiunge il ticket venduto anche al visitatore.
      * @param visitatore Il visitatore che sta comprando il biglietto.
      * @param mostra
      * @return
@@ -256,8 +262,8 @@ public class Museo extends Observable {
     public void addBilancio(Object richiedente, int incasso) throws Exception {
         if (richiedente instanceof Organizzatore || richiedente instanceof Amministratore) {
             this.bilancio += incasso;
-            //setChanged();
-            //notifyObservers(new StatoMuseo(null, bilancio, null, null, null));
+            setChanged();
+            notifyObservers();
         } else {
             throw new Exception("Solo un Amministratore o un Organizzatore può aggiungere soldi al Bilancio del Museo");
         }
@@ -384,6 +390,7 @@ public class Museo extends Observable {
     public void chiudiMostra(Organizzatore organizzatore, Mostra mostra){
         if(organizzatore == mostra.getOrganizzatore()){
             StatoMuseo sm = new StatoMuseo(null, null, loadFactorSale, mostra, true);
+            this.bilancio += mostra.svuotaCasse();
             this.mostre.remove(mostra);
             updateLoadFactorSale();
             sm.setLoadFactorSale(loadFactorSale);
@@ -396,4 +403,9 @@ public class Museo extends Observable {
         return utentiRegistrati;
     }
 
+    public double getLoadFactorSale(Object requester) {
+        if(requester instanceof Amministratore)
+            return loadFactorSale;
+        return 0.f;
+    }
 }
