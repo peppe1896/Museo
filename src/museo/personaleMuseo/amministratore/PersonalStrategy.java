@@ -1,9 +1,9 @@
-package personale.pkgIncaricoMostra;
+package museo.personaleMuseo.amministratore;
 
-import museo.Museo;
+import museo.strutturaMuseo.Museo;
 import opera.GestoreOpere;
 import opera.Opera;
-import personale.NoMoneyException;
+import museo.personaleMuseo.NoMoneyException;
 
 import java.util.ArrayList;
 import java.util.Iterator;

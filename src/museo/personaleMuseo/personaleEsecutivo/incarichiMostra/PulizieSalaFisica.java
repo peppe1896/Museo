@@ -1,6 +1,4 @@
-package personale.pkgIncaricoImpiegato;
-
-import personale.IncaricoImpiegato;
+package museo.personaleMuseo.personaleEsecutivo.incarichiMostra;
 
 public class PulizieSalaFisica extends IncaricoImpiegato {
     @Override

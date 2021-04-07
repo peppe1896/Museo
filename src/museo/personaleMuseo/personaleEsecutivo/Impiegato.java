@@ -1,4 +1,6 @@
-package personale;
+package museo.personaleMuseo.personaleEsecutivo;
+
+import museo.personaleMuseo.personaleEsecutivo.incarichiMostra.IncaricoImpiegato;
 
 import java.util.ArrayList;
 import java.util.List;

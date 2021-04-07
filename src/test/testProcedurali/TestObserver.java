@@ -1,12 +1,11 @@
-package test.testObserver;
+package test.testProcedurali;
 
-import museo.Museo;
+import museo.strutturaMuseo.Museo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import personale.pkgIncaricoMostra.Amministratore;
-import personale.pkgIncaricoMostra.IncaricoMostra;
+import museo.personaleMuseo.amministratore.Amministratore;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,6 +1,6 @@
 package visitatore;
 
-import museo.TicketMuseo;
+import museo.ticket.TicketMuseo;
 
 import java.util.ArrayList;
 

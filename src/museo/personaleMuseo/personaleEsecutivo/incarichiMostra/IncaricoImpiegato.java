@@ -1,4 +1,6 @@
-package personale;
+package museo.personaleMuseo.personaleEsecutivo.incarichiMostra;
+
+import museo.personaleMuseo.Incarico;
 
 /**
  * Sono gli incarichi che vengono assegnati agli impiegati. Questi vengono assegnati agli Impiegati dagli Organizzatori

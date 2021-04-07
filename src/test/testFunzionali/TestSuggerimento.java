@@ -1,11 +1,11 @@
 package test.testFunzionali;
 
-import museo.Museo;
-import museo.Suggerimento;
+import museo.strutturaMuseo.Museo;
+import museo.strutturaMuseo.Suggerimento;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.pkgIncaricoMostra.Amministratore;
+import museo.personaleMuseo.amministratore.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.LinkedHashMap;

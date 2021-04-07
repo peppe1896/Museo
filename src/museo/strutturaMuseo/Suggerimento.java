@@ -1,5 +1,6 @@
-package museo;
+package museo.strutturaMuseo;
 
+import museo.Suggeritore;
 import opera.Opera;
 
 public class Suggerimento {

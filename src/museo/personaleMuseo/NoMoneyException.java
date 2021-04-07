@@ -1,4 +1,4 @@
-package personale;
+package museo.personaleMuseo;
 
 public class NoMoneyException extends RuntimeException{
 

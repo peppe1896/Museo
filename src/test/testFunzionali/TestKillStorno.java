@@ -1,11 +1,11 @@
 package test.testFunzionali;
 
-import museo.Mostra;
-import museo.Museo;
+import museo.strutturaMuseo.Mostra;
+import museo.strutturaMuseo.Museo;
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import personale.pkgIncaricoMostra.Amministratore;
-import personale.pkgIncaricoMostra.IncaricoMostra;
+import museo.personaleMuseo.amministratore.Amministratore;
+import museo.personaleMuseo.amministratore.IncaricoMostra;
 import visitatore.Visitatore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

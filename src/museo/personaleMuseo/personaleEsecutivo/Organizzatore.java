@@ -1,15 +1,12 @@
-package personale;
+package museo.personaleMuseo.personaleEsecutivo;
 
-import museo.Mostra;
-import museo.Museo;
+import museo.strutturaMuseo.Mostra;
+import museo.strutturaMuseo.Museo;
 import museo.sale.Sala;
 import opera.GestoreOpere;
 import opera.Opera;
-import personale.pkgIncaricoImpiegato.CreaPubblicità;
-import personale.pkgIncaricoImpiegato.OrganizzaSitoWeb;
-import personale.pkgIncaricoImpiegato.PulizieSalaFisica;
-import personale.pkgIncaricoImpiegato.spostareOpera;
-import personale.pkgIncaricoMostra.IncaricoMostra;
+import museo.personaleMuseo.amministratore.IncaricoMostra;
+import museo.personaleMuseo.personaleEsecutivo.incarichiMostra.*;
 import visitatore.Acquirente;
 
 import java.util.*;

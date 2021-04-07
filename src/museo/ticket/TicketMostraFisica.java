@@ -1,6 +1,5 @@
 package museo.ticket;
 
-import museo.TicketMuseo;
 import visitatore.Visitatore;
 
 public class TicketMostraFisica implements TicketMuseo {

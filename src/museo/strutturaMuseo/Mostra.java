@@ -1,10 +1,10 @@
-package museo;
+package museo.strutturaMuseo;
 
 import museo.sale.Sala;
 import museo.sale.SalaFisica;
 import museo.sale.SalaVirtuale;
 import opera.Opera;
-import personale.Organizzatore;
+import museo.personaleMuseo.personaleEsecutivo.Organizzatore;
 import visitatore.Acquirente;
 
 import java.util.*;

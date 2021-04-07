@@ -1,12 +1,12 @@
 package test.testFunzionali;
 
-import museo.Mostra;
-import museo.Museo;
+import museo.strutturaMuseo.Mostra;
+import museo.strutturaMuseo.Museo;
 
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import personale.NoMoneyException;
-import personale.pkgIncaricoMostra.Amministratore;
+import museo.personaleMuseo.NoMoneyException;
+import museo.personaleMuseo.amministratore.Amministratore;
 import visitatore.Visitatore;
 import visitatore.VisitatoreReg;
 

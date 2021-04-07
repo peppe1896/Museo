@@ -1,7 +1,7 @@
 package visitatore;
 
-import museo.TicketMuseo;
-import personale.NoMoneyException;
+import museo.ticket.TicketMuseo;
+import museo.personaleMuseo.NoMoneyException;
 
 public interface Acquirente {
     void paga(int somma) throws NoMoneyException;

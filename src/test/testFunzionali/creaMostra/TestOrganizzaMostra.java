@@ -1,9 +1,9 @@
 package test.testFunzionali.creaMostra;
 
-import museo.Museo;
+import museo.strutturaMuseo.Museo;
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import personale.pkgIncaricoMostra.Amministratore;
+import museo.personaleMuseo.amministratore.Amministratore;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package museo;
+package museo.ticket;
 
 /**
  * Classe astratta che raccoglie i Ticket, che possono essere:

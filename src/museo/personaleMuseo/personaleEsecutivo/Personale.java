@@ -1,6 +1,7 @@
-package personale;
+package museo.personaleMuseo.personaleEsecutivo;
 
 import museo.Suggeritore;
+import museo.personaleMuseo.personaleEsecutivo.incarichiMostra.IncaricoImpiegato;
 
 
 /**

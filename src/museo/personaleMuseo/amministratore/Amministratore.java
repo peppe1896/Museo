@@ -1,11 +1,11 @@
-package personale.pkgIncaricoMostra;
+package museo.personaleMuseo.amministratore;
 
-import museo.Mostra;
-import museo.Museo;
-import museo.StatoMuseo;
-import museo.Suggerimento;
+import museo.strutturaMuseo.Mostra;
+import museo.strutturaMuseo.Museo;
+import museo.strutturaMuseo.StatoMuseo;
+import museo.strutturaMuseo.Suggerimento;
 import opera.Opera;
-import personale.Organizzatore;
+import museo.personaleMuseo.personaleEsecutivo.Organizzatore;
 import test.testFunzionali.creaMostra.TestStrategyIncaricoMostra;
 
 import java.util.*;

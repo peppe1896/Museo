@@ -1,14 +1,14 @@
 package test.testFunzionali.creaMostra;
 
 
-import museo.Mostra;
-import museo.Museo;
-import museo.Suggerimento;
+import museo.strutturaMuseo.Mostra;
+import museo.strutturaMuseo.Museo;
+import museo.strutturaMuseo.Suggerimento;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import personale.pkgIncaricoMostra.Amministratore;
-import personale.pkgIncaricoMostra.IncaricoMostra;
+import museo.personaleMuseo.amministratore.Amministratore;
+import museo.personaleMuseo.amministratore.IncaricoMostra;
 import visitatore.Visitatore;
 
 import java.util.List;

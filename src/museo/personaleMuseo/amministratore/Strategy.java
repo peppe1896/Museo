@@ -1,6 +1,6 @@
-package personale.pkgIncaricoMostra;
+package museo.personaleMuseo.amministratore;
 
-import museo.Museo;
+import museo.strutturaMuseo.Museo;
 
 public interface Strategy {
     /**

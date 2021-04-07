@@ -1,6 +1,6 @@
 package opera;
 
-import museo.Museo;
+import museo.strutturaMuseo.Museo;
 
 /**
  * Descrive un'opera. E' parzialmente immutabile. Il costruttore package-protected permette solo al

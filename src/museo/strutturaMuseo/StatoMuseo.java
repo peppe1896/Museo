@@ -1,4 +1,4 @@
-package museo;
+package museo.strutturaMuseo;
 
 /**
  * Ci sono alcune informazioni sullo stato del museo, che vengono mandate all'Amministratore tramite

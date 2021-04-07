@@ -1,15 +1,19 @@
-package museo;
+package museo.strutturaMuseo;
 
 import museo.sale.Sala;
 import museo.sale.SalaFisica;
 import museo.sale.SalaVirtuale;
 import museo.ticket.Biglietto;
 import museo.ticket.TicketMostraFisicaEVirtuale;
+import museo.ticket.TicketMuseo;
 import opera.GestoreOpere;
 import opera.Opera;
-import personale.*;
-import personale.pkgIncaricoMostra.Amministratore;
-import personale.pkgIncaricoMostra.Strategy;
+import museo.personaleMuseo.*;
+import museo.personaleMuseo.amministratore.Amministratore;
+import museo.personaleMuseo.amministratore.Strategy;
+import museo.personaleMuseo.personaleEsecutivo.Impiegato;
+import museo.personaleMuseo.personaleEsecutivo.Organizzatore;
+import museo.personaleMuseo.personaleEsecutivo.Personale;
 import visitatore.Acquirente;
 import visitatore.Visitatore;
 import visitatore.VisitatoreReg;

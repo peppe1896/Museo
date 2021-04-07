@@ -1,9 +1,12 @@
-package personale.pkgIncaricoMostra;
+package museo.personaleMuseo.amministratore;
 
-import museo.Mostra;
+import museo.strutturaMuseo.Mostra;
 import opera.GestoreOpere;
 import opera.Opera;
-import personale.*;
+import museo.personaleMuseo.*;
+import museo.personaleMuseo.Incarico;
+import museo.personaleMuseo.personaleEsecutivo.Organizzatore;
+import museo.personaleMuseo.personaleEsecutivo.Personale;
 
 import java.util.ArrayList;
 import java.util.List;
