@@ -6,11 +6,20 @@ import museo.Museo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import personale.NoMoneyException;
 import personale.pkgIncaricoMostra.Amministratore;
 import visitatore.Visitatore;
+import visitatore.VisitatoreReg;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testo dai casi base della semplice vendita per vedere se funziona il sistema di pagamento ingresso.
+ * Provo come i Visitatori possano registrarsi e come possano scegliere una preferenza sui posti se sono registrati.
+ * Verifico anche che le Mostre che sono state riempite siano state chiuse in automatico.
+ */
 public class TestVenditaBigliettiETicket {
     private Museo museo;
     private Amministratore amministratore;
@@ -28,18 +37,24 @@ public class TestVenditaBigliettiETicket {
     @Test
     @DisplayName("Test no Budget")
     public void testVendiBigliettoNoBudget(){
-        assertFalse(museo.vendiBigliettoMuseo(new Visitatore()));
+        try {
+            museo.vendiBigliettoMuseo(new Visitatore());
+        }catch (NoMoneyException e) {
+            assertTrue(true);
+        }
     }
 
     /**
-     * Il biglietto di ingresso costa 10, quindi se metto 9 non deve farmi entrare.
+     * Il biglietto di ingresso costa 10. Uso l'Eccezione  NoMoneyException per capire se il test fallisce.
      */
     @Test
     @DisplayName("Test with Budget")
     public void testVendiBigliettoBudget(){
-        assertTrue(museo.vendiBigliettoMuseo(new Visitatore(100)));
-        assertFalse(museo.vendiBigliettoMuseo(new Visitatore(9)));
-
+        try {
+            assertTrue(museo.vendiBigliettoMuseo(new Visitatore(100)));
+        }catch (NoMoneyException e){
+            assertFalse(true);
+        }
     }
 
     /**
@@ -54,13 +69,18 @@ public class TestVenditaBigliettiETicket {
         Visitatore[] visitatori = new Visitatore[60];
         for(int i=0;i< visitatori.length;i++){
             visitatori[i] = new Visitatore(100);
+            museo.registraVisitatore(visitatori[i]);
         }
         assertTrue(museo.getMostre().size() != 0);
         Object mostre[] = museo.getMostre().toArray();
         Mostra m = ((Mostra)mostre[0]);
         assertEquals(m.getPostiFisiciRimasti(), m.getPostiRimasti());
-        for(int i=0;i<m.getPostiFisiciRimasti();i++) {
-            museo.vendiTicketMostraFisica(visitatori[i], m);
+        int postiFisiciRimasti = m.getPostiFisiciRimasti();
+        for(int i=0;i<postiFisiciRimasti + 10;i++) {
+            if(i<postiFisiciRimasti)
+                assertTrue(museo.vendiTicketMostraFisica(visitatori[i], m));
+            else
+                assertFalse(museo.vendiTicketMostraFisica(visitatori[i], m));
         }
         assertTrue(m.isTerminata());
         assertTrue(oldBilancio < museo.getBilancio(amministratore));
@@ -73,19 +93,19 @@ public class TestVenditaBigliettiETicket {
     @Test
     @DisplayName("Test Vendita Ticket mostre miste, quindi su Sale fisiche e Virtuali")
     public void testSaleMiste(){
-        museo.setBilancio(amministratore, 4000);
+        museo.setBilancio(amministratore, 6000);
         Visitatore[] visitatori = new Visitatore[60];
         for(int i=0;i< visitatori.length;i++){
             visitatori[i] = new Visitatore(200);
+            museo.vendiBigliettoMuseo(visitatori[i]);
         }
         assertTrue(museo.getMostre().size() != 0);
         Object mostre[] = museo.getMostre().toArray();
         Mostra m = ((Mostra)mostre[0]);
-        assertEquals(m.getPostiFisiciRimasti(), m.getPostiRimasti());
-        for(int i=0;i<m.getPostiFisiciRimasti();i++) {
-            museo.vendiTicketMostraFisica(visitatori[i], m);
+        assertEquals((m.getPostiFisiciRimasti() + m.getPostiVirtualiRimasti()), m.getPostiRimasti());
+        for(Map.Entry<String, VisitatoreReg> entry: museo.getUtentiRegistrati().entrySet()) {
+            museo.vendiTicketMostraVirtuale(entry.getValue(), m, true);
         }
         assertTrue(m.isTerminata());
-
     }
 }

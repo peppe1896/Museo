@@ -10,7 +10,7 @@ import personale.pkgIncaricoImpiegato.OrganizzaSitoWeb;
 import personale.pkgIncaricoImpiegato.PulizieSalaFisica;
 import personale.pkgIncaricoImpiegato.spostareOpera;
 import personale.pkgIncaricoMostra.IncaricoMostra;
-import visitatore.Visitatore;
+import visitatore.Acquirente;
 
 import java.util.*;
 
@@ -155,9 +155,8 @@ public class Organizzatore extends Personale implements Observer {
         try {
             incaricoAttuale.prelevaDenaro(this, rimanenze);
         }catch (Exception e){;}
-        calcolaCostoIngresso(ancheVirtuale);
+        setDetailMostra(ancheVirtuale);
         mostra.setOpereMostra(incaricoAttuale.getOpereMostra());
-        museo.addMostra(mostra);
     }
 
     /**
@@ -166,7 +165,7 @@ public class Organizzatore extends Personale implements Observer {
      * Per ottenere quanti soldi sono stati spesi vedo il valore dei fondiStaziati e vedo quanti soldi sono rimasti
      * in Mostra. Ogni Stanza può esporre un'Opera di quelle affittate, che sia SalaFisica o SalaVirtuale.
      */
-    private void calcolaCostoIngresso(boolean ancheVirtuale){
+    private void setDetailMostra(boolean ancheVirtuale){
         Mostra mostra = incaricoAttuale.getMostra();
         List<Sala> saleMuseo = museo.getSale(ancheVirtuale);
         Set<Sala> saleMostra = new HashSet<>();
@@ -189,6 +188,7 @@ public class Organizzatore extends Personale implements Observer {
         mostra.setSale(saleMostra, ancheVirtuale);
         mostra.setCostoBiglietto(costoBiglietto);
         mostra.setIncassoObiettivo(costoBiglietto * count);
+        mostra.setOrganizzatore(this);
     }
 
     private void svolgiCompitiImpiegati(){
@@ -201,18 +201,18 @@ public class Organizzatore extends Personale implements Observer {
      * Stacca l'observer, e resetta le Sale.
      */
     private void chiudiMostra(){
+        if(incaricoAttuale.isKillable())
+            incaricoAttuale.kill();
         Mostra mostra = incaricoAttuale.getMostra();
         GestoreOpere gestoreOpere = museo.getGestoreOpere();
-        incaricoAttuale.kill();
         for(Opera o: incaricoAttuale.getOpereMostra())
             gestoreOpere.restituisciOperaAffittata(o);
         for(Personale pp:incaricoAttuale.getImpiegati()) {
             pp.setFree();
             try {
                 pp.setIncaricoImpiegato(null);
-            }catch (Exception e){}
+            } catch (Exception e) { }
         }
-
         try {
             museo.addBilancio(this, mostra.svuotaCasse());
         }catch (Exception e){}
@@ -235,10 +235,10 @@ public class Organizzatore extends Personale implements Observer {
 
     private void stornaDenaroVisitatori(){
         Mostra mostra = incaricoAttuale.getMostra();
-        List<Visitatore> visitatori = mostra.getVisitatoriMostra();
+        List<Acquirente> visitatori = mostra.getVisitatoriMostra();
         int costoBiglietto = mostra.getCostoBiglietto();
         int parteDaStornare = calcolaStorno(costoBiglietto, 0.4f);
-        for(Visitatore visitatore: visitatori)
+        for(Acquirente visitatore: visitatori)
             visitatore.ottieniRimborso(parteDaStornare);
     }
 

@@ -5,18 +5,16 @@ import museo.sale.SalaFisica;
 import museo.sale.SalaVirtuale;
 import opera.Opera;
 import personale.Organizzatore;
-import visitatore.Visitatore;
+import visitatore.Acquirente;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Una mostra è un Observable osservato dal suo Organizzatore. La mostra ha un numero di posti massimo
  * e quando viene riempito manda una notifica all'organizzatore che provvede a chiuderla e a incassare.
  */
 public class Mostra extends Observable {
+    private String name;
     Set<Sala> sale;
     private boolean ancheOnline = false;
     List<Opera> opereMostra;
@@ -25,69 +23,34 @@ public class Mostra extends Observable {
     private int bigliettiVenduti = 0;
     private int postiTotali;
     private int incassoObiettivo;
-    private List<Visitatore> visitatoriMostra = new ArrayList<>();
+    private List<Acquirente> visitatoriMostra = new ArrayList<>();
     private boolean terminata = false;
     private Organizzatore organizzatore;
     private int postiFisici = 0;
     private int postiVirtuali = 0;
 
-    /**
-     * Procedura per pagare il costo del biglietto. Verifica se si può acquistare un posto, e se si, aggiunge l'importo
-     * del biglietto alla cassa della Mostra. Ritorna True se è riuscito a pagare
-     * Più specificatamente.
-     * Sto cercando un posto virtuale->se c'è un posto virtuale disponibile, incasso il costo del biglietto, tolgo
-     * 1 ai posti virtuali disponibili e ritorno true, altrimenti se non ci sono posti virtuali disponibili, ritorno false.
-     * Se il parametro è false, vuol dire che sto cercando un posto fisico. Stesso ragionamento.
-     * @param visitatore Colui che sta comprando il Biglietto.
-     * @param postoVirtuale se sto cercando un posto virtuale || false è per indicare un posto fisico
-     * @return true se c'è un posto disponibile, e incasso il prezzo del biglietto.
-     */
-    public boolean pagaIngresso(Visitatore visitatore, boolean postoVirtuale){
-        if (postoVirtuale) {
-            if (acquistabile(postoVirtuale)){
-                this.incasso += incasso;
-                postiTotali--;
-                bigliettiVenduti++;
-                checkRaggiuntoIncasso();
-                addVisitatore(visitatore);
-                return true;
-            }
-        }else{
-            if(acquistabile(!postoVirtuale)) {
-                this.incasso += incasso;
-                postiTotali--;
-                bigliettiVenduti++;
-                checkRaggiuntoIncasso();
-                addVisitatore(visitatore);
-                return true;
-            }
-        }return false;
+
+    public Mostra(){
+        Random rnd = new Random();
+        name = "Mostra " + (char)('a' + rnd.nextInt(26))+
+                (char)('a' + rnd.nextInt(26))+
+                (char)('a' + rnd.nextInt(26))+
+                (char)('a' + rnd.nextInt(26))+
+                (char)('a' + rnd.nextInt(26));
     }
+
     public void incassa(int incassa){
         this.incasso += incassa;
     }
-    /**
-     * E' acquistabile un posto? Con il boolean chiedo se posso acquistare un posto virtuale, e con false
-     * chiedo se posso acquistare un posto fisico.
-     * @param postoFisico se true vedo se un postoFisico è acquistabile.
-     * @return true se puoi comprarlo
-     */
-    private boolean acquistabile(boolean postoFisico){
-        if(postoFisico) {
-            if(postiFisici > 0) {
-                postiFisici--;
-                return true;
-            }
-        } else {
-            if (postiVirtuali > 0) {
-                postiVirtuali--;
-                return true;
-            }
-        }
-        return false;
+
+    public void incassaBiglietto(Acquirente v) {
+        bigliettiVenduti++;
+        this.incasso += this.costoBiglietto;
+        addVisitatore(v);
+        checkRaggiuntoIncasso();
     }
 
-    private void addVisitatore(Visitatore visitatore){
+    private void addVisitatore(Acquirente visitatore){
         this.visitatoriMostra.add(visitatore);
     }
 
@@ -154,6 +117,7 @@ public class Mostra extends Observable {
      */
     private void checkRaggiuntoIncasso(){
         if(incasso >= incassoObiettivo) {
+            System.out.println("Raggiunto incasso obiettivo");
             setChanged();
             notifyObservers();
         }
@@ -163,7 +127,7 @@ public class Mostra extends Observable {
      * Ci serve per fare l'eventuale Storno dei biglietti.
      * @return i Visitatori che hanno pagato il biglietto.
      */
-    public List<Visitatore> getVisitatoriMostra(){
+    public List<Acquirente> getVisitatoriMostra(){
         return visitatoriMostra;
     }
 
@@ -195,4 +159,17 @@ public class Mostra extends Observable {
         return postiVirtuali;
     }
 
+    public void togliPostoFisico(){
+        postiFisici--;
+        postiTotali--;
+    }
+
+    public void togliPostoVirtuale(){
+        postiVirtuali--;
+        postiTotali--;
+    }
+
+    public String getName(){
+        return name;
+    }
 }

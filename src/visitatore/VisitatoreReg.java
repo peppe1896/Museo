@@ -1,15 +1,38 @@
 package visitatore;
 
-public class VisitatoreReg extends Visitatore {
+import museo.TicketMuseo;
+
+import java.util.ArrayList;
+
+public class VisitatoreReg extends Visitatore implements Acquirente {
     private String username = "username";
     private boolean firstSet = true;
+    private int bilancio = 0;
+    private ArrayList<TicketMuseo> ticketsAcquistati = new ArrayList<>();
 
-    public VisitatoreReg(){
-        super();
+    public VisitatoreReg(int bilancio) {
+        super(bilancio);
+    }
+/*
+    public boolean paga(int soldi){
+        if(bilancio>=soldi){
+            bilancio -= soldi;
+            return true;
+        }
+        return false;
+    }
+*/
+    public void addTicket(TicketMuseo ticketMuseo){
+        this.ticketsAcquistati.add(ticketMuseo);
     }
 
-    public VisitatoreReg(int money){
-        super(money);
+
+    public void ottieniRimborso(int rimborso){
+        this.bilancio += rimborso;
+    }
+
+    public int getBilancio(){
+        return bilancio;
     }
 
     public void setUsername(String username){
@@ -22,5 +45,4 @@ public class VisitatoreReg extends Visitatore {
     public String getUsername(){
         return username;
     }
-
 }

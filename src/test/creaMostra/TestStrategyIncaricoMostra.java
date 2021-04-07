@@ -66,7 +66,7 @@ public class TestStrategyIncaricoMostra {
     public void testStrategyHighBal(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore,3000);
-        IncaricoMostra incaricoMostra = amministratore.azioneAmministratore();
+        IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(2,5,true);
         List<Opera> opere = incaricoMostra.getOpereMostra();
         int count = 0;
         for(Opera o: opere){
@@ -83,9 +83,10 @@ public class TestStrategyIncaricoMostra {
      */
     @Test
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
-    public IncaricoMostra testStrategyAuto(){
+    public void testStrategyAuto(){
+        museo.setBilancio(amministratore, 500);
         amministratore.setAmministratoreAutomatico(false);
-        Visitatore v = new Visitatore();
+        Visitatore v = new Visitatore(100);
         Opera opera1 = gestoreOpere.getOperaNome("TestA");
         Opera opera2 = gestoreOpere.getOperaNome("TestB");
         for(int i=0;i<5;i++) {
@@ -95,7 +96,6 @@ public class TestStrategyIncaricoMostra {
         incaricoMostra = amministratore.forceStrategyExecution(3);
         assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
         assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
-        return incaricoMostra;
     }
 
     /**
@@ -105,7 +105,7 @@ public class TestStrategyIncaricoMostra {
     @Test
     @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolgimento")
     public void testKillStrategy(){
-        incaricoMostra = testStrategyAuto();
+        testStrategyAuto();
         Mostra m = incaricoMostra.getMostra();
         assertFalse(m.isTerminata());
         amministratore.forceStrategyExecution(0);

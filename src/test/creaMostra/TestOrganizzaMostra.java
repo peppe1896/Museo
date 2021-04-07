@@ -10,10 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestOrganizzaMostra {
     private static Museo museo;
     private static Amministratore amministratore;
-    private static IncaricoMostra incaricoMostra;
-    private static IncaricoMostra incaricoMostra2;
-    private static IncaricoMostra incaricoMostra3;
-    private static IncaricoMostra incaricoMostra4;
 
     @BeforeAll
     public static void initTest(){
@@ -24,21 +20,25 @@ public class TestOrganizzaMostra {
 
     /**
      * L'incarico assegnato a un organizzatore è appunto organizzare una mostra. Quindi chiamando il metodo
-     * svolgiIncarico mi aspetto di trovare una Mostra nel Museo.
+     * svolgiIncarico mi aspetto di trovare una Mostra nel Museo. Questo è chiamato in forward dal metodo
+     * forceStrategyExecution
      */
     @Test
     @DisplayName("Test creazione una Mostra")
     public void testSingolaMostra(){
-        incaricoMostra.getOrganizzatore().svolgiIncaricoAssegnato();
+        amministratore.setAmministratoreAutomatico(false);
+        amministratore.forceStrategyExecution(2, 5, false);
         assertEquals(museo.getMostre().size(), 1);
     }
 
     @Test
     @DisplayName("Test creazione Mostre con singola Strategia")
     public void testMultiMostreSingolaStrategia(){
-        incaricoMostra2.getOrganizzatore().svolgiIncaricoAssegnato();
-        incaricoMostra3.getOrganizzatore().svolgiIncaricoAssegnato();
-        incaricoMostra4.getOrganizzatore().svolgiIncaricoAssegnato();
+        amministratore.setAmministratoreAutomatico(false);
+        amministratore.forceStrategyExecution(2, 5, false);
+        amministratore.forceStrategyExecution(2, 5, false);
+        amministratore.forceStrategyExecution(2, 5, false);
+        amministratore.forceStrategyExecution(2, 5, false);
         assertEquals(museo.getMostre().size(), 4);
     }
 
