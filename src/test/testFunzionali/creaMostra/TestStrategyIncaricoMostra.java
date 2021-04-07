@@ -1,4 +1,4 @@
-package test.creaMostra;
+package test.testFunzionali.creaMostra;
 
 
 import museo.Mostra;
@@ -15,6 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Se questo test fallisce è perché alcune opere che si stanno cercando di prendere
+ */
 public class TestStrategyIncaricoMostra {
     private Museo museo;
     private Amministratore amministratore;
@@ -66,7 +69,7 @@ public class TestStrategyIncaricoMostra {
     public void testStrategyHighBal(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore,3000);
-        IncaricoMostra incaricoMostra = amministratore.azioneAmministratore();
+        IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(2,5,true);
         List<Opera> opere = incaricoMostra.getOpereMostra();
         int count = 0;
         for(Opera o: opere){
@@ -83,11 +86,12 @@ public class TestStrategyIncaricoMostra {
      */
     @Test
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
-    public IncaricoMostra testStrategyAuto(){
+    public void testStrategyAuto(){
         amministratore.setAmministratoreAutomatico(false);
-        Visitatore v = new Visitatore();
-        Opera opera1 = gestoreOpere.getOperaNome("TestA");
-        Opera opera2 = gestoreOpere.getOperaNome("TestB");
+        museo.setBilancio(amministratore, 500);
+        Visitatore v = new Visitatore(100);
+        Opera opera1 = gestoreOpere.getOperaNome("TestY");
+        Opera opera2 = gestoreOpere.getOperaNome("TestZ");
         for(int i=0;i<5;i++) {
             museo.registraSuggerimento(new Suggerimento(opera1, v));
             museo.registraSuggerimento(new Suggerimento(opera2, v));
@@ -95,7 +99,6 @@ public class TestStrategyIncaricoMostra {
         incaricoMostra = amministratore.forceStrategyExecution(3);
         assertTrue(incaricoMostra.getOpereMostra().contains(opera1));
         assertTrue(incaricoMostra.getOpereMostra().contains(opera2));
-        return incaricoMostra;
     }
 
     /**
@@ -105,10 +108,16 @@ public class TestStrategyIncaricoMostra {
     @Test
     @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolgimento")
     public void testKillStrategy(){
-        incaricoMostra = testStrategyAuto();
+        testStrategyAuto();
         Mostra m = incaricoMostra.getMostra();
         assertFalse(m.isTerminata());
         amministratore.forceStrategyExecution(0);
         assertTrue(m.isTerminata());
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

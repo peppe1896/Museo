@@ -3,6 +3,7 @@ package personale.pkgIncaricoMostra;
 import museo.Museo;
 import opera.GestoreOpere;
 import opera.Opera;
+import personale.NoMoneyException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,11 +43,14 @@ public class OnSuggestStrategy implements Strategy {
         while(opereNuovoIncarico.size() < numeroOpereAutoStrategy && iterator.hasNext()){
             Opera opera = iterator.next();
                 if(opera.getProprietario() != museo)
-                    if(!opera.isBusy()){
-                    gestoreOpere.affittaOperaAMuseo(opera, incarico, museo);
-                    opereNuovoIncarico.add(opera);
-                    opereResetSuggerimenti.add(opera);
-                }
+                    if(!opera.isBusy()) {
+                        try {
+                            museo.prelevaBilancio(this, opera.getCostoNoleggio());
+                            gestoreOpere.affittaOperaAMuseo(opera, incarico, museo);
+                            opereNuovoIncarico.add(opera);
+                            opereResetSuggerimenti.add(opera);
+                        } catch (NoMoneyException e) { System.err.println(e.getMessage());}
+                    }
         }
         amministratore.resetSuggerimentiPerOpere(opereResetSuggerimenti);
 

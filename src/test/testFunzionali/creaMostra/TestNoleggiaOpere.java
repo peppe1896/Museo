@@ -1,4 +1,4 @@
-package test.creaMostra;
+package test.testFunzionali.creaMostra;
 
 import museo.Museo;
 import opera.GestoreOpere;
@@ -37,11 +37,34 @@ public class TestNoleggiaOpere {
      */
     @Test
     @DisplayName("Test verifica noleggio opere di un IncaricoMostra")
-    public void test(){
+    public void testNoleggiaConSoldi(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore, 50000);
         incaricoMostra = amministratore.forceStrategyExecution(2,14,false);
         for(Opera o: incaricoMostra.getOpereMostra())
             assertTrue(o.getAffittuario() == museo);
+    }
+
+    /**
+     * Mi aspetto che almeno un'opera non sia riuscito ad affittarla, di quelle che l'IncaricoMostra prevedeva.
+     */
+    @Test
+    @DisplayName("Test noleggio senza soldi")
+    public void testNoleggiaSenzaSoldi(){
+        amministratore.setAmministratoreAutomatico(false);
+        museo.setBilancio(amministratore, 50);
+        int numeroOperePreviste = 14;
+        incaricoMostra = amministratore.forceStrategyExecution(2,numeroOperePreviste,false);
+        int count = 0;
+        for(Opera o:incaricoMostra.getOpereMostra())
+            if(o.getAffittuario() == museo)
+                count++;
+        assertFalse(count == numeroOperePreviste);
+    }
+
+    @AfterEach
+    public void clear(){
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 }

@@ -1,7 +1,8 @@
-package test;
+package test.testFunzionali;
 
 import museo.Museo;
 import museo.Suggerimento;
+import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
 import personale.pkgIncaricoMostra.Amministratore;
@@ -28,6 +29,8 @@ public class TestSuggerimento {
         Opera operaTest = museo.getGestoreOpere().getOperaNome(operaDiTest);
         suggerimento = new Suggerimento(operaTest, visitatore);
         amministratore = new Amministratore(museo);
+        GestoreOpere gestoreOpere = museo.getGestoreOpere();
+        gestoreOpere.resetAllOpere();
     }
 
     /**

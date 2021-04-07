@@ -6,28 +6,28 @@ package museo;
  */
 public class StatoMuseo {
     private Suggerimento suggerimento;
-    private int bilancioMuseo;
-    private double loadFactorSale;
+    private Integer bilancioMuseo;
+    private Double loadFactorSale;
     private Mostra mostraChiusa;
-    private boolean mostraAggiunta;
+    private Boolean museoIsReady;
 
-    StatoMuseo(Suggerimento suggerimento, int bilancioMuseo, double loadFactorSale, Mostra mostraChiusa, boolean mostraAggiunta){
+    StatoMuseo(Suggerimento suggerimento, Integer bilancioMuseo, Double loadFactorSale, Mostra mostraChiusa, Boolean museoIsReady){
         this.suggerimento = suggerimento;
         this.bilancioMuseo = bilancioMuseo;
         this.loadFactorSale = loadFactorSale;
         this.mostraChiusa = mostraChiusa;
-        this.mostraAggiunta = mostraAggiunta;
+        this.museoIsReady = museoIsReady;
     }
 
     public Suggerimento getOperaSuggerita(){
         return suggerimento;
     }
 
-    public int getBilancioMuseo(){
+    public Integer getBilancioMuseo(){
         return bilancioMuseo;
     }
 
-    public double getLoadFactorSale() {
+    public Double getLoadFactorSale() {
         return loadFactorSale;
     }
 
@@ -40,7 +40,11 @@ public class StatoMuseo {
      * creare un'altra Mostra.
      * @return true se è stata aggiunta una Mostra.
      */
-    public boolean getMostraAggiunta(){
-        return mostraAggiunta;
+    public Boolean getMuseoIsReady(){
+        return museoIsReady;
+    }
+
+    public void setLoadFactorSale(double newLoadFactor){
+        this.loadFactorSale = newLoadFactor;
     }
 }

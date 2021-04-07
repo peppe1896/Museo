@@ -11,9 +11,9 @@ import museo.Museo;
 public final class Opera {
     private final String nome;
     private final String autore;
-    private final Museo proprietario;
     private final int costoNoleggio;
 
+    private Museo proprietario;
     private Museo museoInMostra;
     private boolean busyInQualcheMostra;
 
@@ -66,6 +66,14 @@ public final class Opera {
     void rilasciaOpera(){
         this.museoInMostra = proprietario;
         this.busyInQualcheMostra = false;
+    }
+
+    /**
+     * Il proprietario deve rimanere immutato. Lo imposta il GestoreOpere.
+     * @param proprietario
+     */
+    void setProprietario(Museo proprietario){
+        this.proprietario = proprietario;
     }
 
 }

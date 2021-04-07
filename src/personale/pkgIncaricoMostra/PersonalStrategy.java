@@ -3,6 +3,7 @@ package personale.pkgIncaricoMostra;
 import museo.Museo;
 import opera.GestoreOpere;
 import opera.Opera;
+import personale.NoMoneyException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,12 +46,16 @@ public class PersonalStrategy implements Strategy {
         iterator = museo.getCatalogoOpere().iterator();
         while(iterator.hasNext() && opereNuovoIncarico.size() < numeroOpere) {
             Opera opera = iterator.next();
-            if(!opera.isBusy() && opera.getProprietario() != museo) {
-                gestoreOpere.affittaOperaAMuseo(opera, incarico, museo);
-                opereNuovoIncarico.add(opera);
+            if (!opera.isBusy() && opera.getProprietario() != museo) {
+                try {
+                    museo.prelevaBilancio(this, opera.getCostoNoleggio());
+                    gestoreOpere.affittaOperaAMuseo(opera, incarico, museo);
+                    opereNuovoIncarico.add(opera);
+                } catch (NoMoneyException e) {
+                    System.err.println(e.getMessage());
+                }
             }
         }
-
         incarico.setOpereMostra(opereNuovoIncarico);
         return incarico;
     }

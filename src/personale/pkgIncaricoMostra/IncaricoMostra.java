@@ -40,6 +40,9 @@ public class IncaricoMostra extends Observable implements Incarico {
 
     /**
      * Metodi che usa l'Amministratore
+     *
+     * Per fare funzionare al meglio l'Amministratore, devo "prendermi il lock" dell'amministratore
+     * e restituirlo quando l'Organizzatore è pronto e ha consegnato la sua Mostra.
      */
     void setOrganizzatore(Organizzatore organizzatore){
         this.organizzatore = organizzatore;
@@ -47,11 +50,9 @@ public class IncaricoMostra extends Observable implements Incarico {
     void setOpereMostra(List<Opera> opere){
         opereMostra = (ArrayList<Opera>) opere;
     }
-    void forzaChiusuraMostra(Object requester){
-        if(requester instanceof Amministratore) {
-            setChanged();
-            notifyObservers();
-        }
+    void forzaChiusuraMostra(){
+        setChanged();
+        notifyObservers();
     }
 
     /**
@@ -79,12 +80,14 @@ public class IncaricoMostra extends Observable implements Incarico {
             if (denaroRichiesto <= bilancio)
                 bilancio -= denaroRichiesto;
             else
-                throw new NoMoneyException("Non ci sono abbastanza fondi");
+                throw new NoMoneyException(denaroRichiesto, bilancio);
         }
     }
 
     public void kill(){
         this.killable = false;
+        //setChanged();
+        //notifyObservers(Boolean.TRUE);
     }
 
     @Override

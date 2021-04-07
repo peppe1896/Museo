@@ -6,9 +6,10 @@ import museo.StatoMuseo;
 import museo.Suggerimento;
 import opera.Opera;
 import personale.Organizzatore;
-import test.creaMostra.TestStrategyIncaricoMostra;
+import test.testFunzionali.creaMostra.TestStrategyIncaricoMostra;
 
 import java.util.*;
+
 /**
  * Amministra un Museo, tenendo d'occhio il numero di suggerimenti per tutte le opere che esistono ed elaborando strategie
  * per creare (o eventualmente non creare) Mostre. Per essere più precisi, crea degli IncarichiMostre, i quali verranno
@@ -21,68 +22,188 @@ public class Amministratore implements Observer {
     private LinkedHashMap<Opera, Integer> suggerimentiPerOpera = new LinkedHashMap<>();
     private int bilancioMuseo = 0;
     private Strategy strategy;
+    private Strategy killMostreStrategy;
+    private Strategy idleStrategy;
 
-    private Set<IncaricoMostra> incarichiCreati = new HashSet<>();
+    private Set<IncaricoMostra> incarichiCreati = new LinkedHashSet<>();
     private Set<Opera> accumuloRichieste = new LinkedHashSet<>();
     private double loadFactorSale = 0.f;
     private List<Mostra> mostreChiuse = new ArrayList<>();
     private boolean goAutomatico = true;
-    private boolean semaphore = true;
-    private int preventRaceCondition = 3;
+    private boolean semaphoreForCreationalStrategies = true;
+    private boolean lockCreationIncaricoMostre = false;
+    private int countSuggest = 0;
+    private int rotations = 0;
 
     /**
      * Il costruttore dell'Amministratore costruisce la LinkedHashMap prendendolo dal Catalogo delle opere
      * condiviso tra tutti i Musei.
+     * Imposta inoltre la strategia di base.
+     *
      * @param museo serve per impostare il museo che deve amministrare.
      */
-    public Amministratore(Museo museo){
+    public Amministratore(Museo museo) {
         this.museo = museo;
         // Inizializzo con 0 suggerimenti per ogni opera.
         loadSuggerimentiPerOpera(this);
         museo.addObserver(this);
         setStrategy();
+        killMostreStrategy = new KillMostreStrategy(incarichiCreati, this);
+        idleStrategy = new IdleStrategy();
+        strategy = idleStrategy;
+        bilancioMuseo = museo.getBilancio(this);
     }
+
     /**
-     * Aggiorna il suo stato con lo StateMuseo che viene passato come parametro.
-     * Lo StateMuseo viene creato ogni volta che cambia il loadFactorSale, per avviare la strategia
-     * di kill delle Mostre, ogni volta che viene creato un suggerimento e ogni volta che viene aggiornato il bilancio
+     * Sceglie in base allo stato del Museo allo stato degli Incarichi generati la Strategia da prendere.
+     * Più specficatamente: aggiorna lo stato prendendo quello del Museo tramite la gestione di oggetti
+     * StatoMuseo, gestisce gli input esterni (impostati dal metodo forceStrategy) usando la flag speciale
+     * strongRestart. La strategia viene impostata dopo che l'Amministratore aggiorna lo stato.
      *
-     * Se ho una strategy KillMostre vuol dire che ho un fattore di carico elevato e quindi voglio attivare la pulizia
-     * delle Mostre. Altrimenti se la strategia non è cambiata non creo altre Mostre.
-     * @param o è sempre il Museo
-     * @param arg StateMuseo.
+     * Questa funzione si pu vedere come due blocchi:
+     * - Aggiorno lo stato
+     * - Faccio un'azione (se goAutomatico è true)
+     *
+     * Nell'ultima parte ho semplicemente un counter per alleggerire le strutture dati.
+     *
+     * Nella fase di scelta aggiorno il semaforo, e faccio l'azione in conseguenza allo stato e al semaforo.
+     * Il semaforo: se verde(true) vuol dire che posso impostare una strategia creazionale;
+     * se giallo(false) o rosso(false), nel setStrategy scelgo cosa fare, cioè se aspettare (IdleStrategy)
+     * oppure ridurre il loadFactorSale tramite la chiusura forzata (KillMostreStrategy) di una o più mostre.
+     *
+     * E' presente il lockCreation che è una flag che viene impostata true quando inizio la creazione
+     * di un nuovo IncaricoMostra. Se così non fosse, essendo che la procedura di costruzione di una Mostra
+     * prevede il dialogo con il Museo, e che questo dialogo causa il trigger di questo Observer, si avrebbe che
+     * nella creazione di una Mostra, si creerebbero almeno 3 Incarichi. Questo implica che ci sarebbero altri
+     * dialoghi tra Museo e Incarico, causando uno stack overflow.
+     * @param o  Museo | null
+     * @param arg StatoMuseo | null
      */
     @Override
     public void update(Observable o, Object arg) {
-        if(arg!=null) {
+        boolean needAdminOp = false;
+        boolean strongRestart = false;
+
+        // UPDATE STATO MUSEO
+        if (o == museo && arg != null) {
             StatoMuseo sm = (StatoMuseo) arg;
             Suggerimento suggerimento = sm.getOperaSuggerita();
+            Integer bilancioMuseoState = sm.getBilancioMuseo();
+            Double loadFactor = sm.getLoadFactorSale();
             Mostra mostra = sm.getMostraChiusa();
+            Boolean museoIsReady = sm.getMuseoIsReady();
 
             if (suggerimento != null) {
                 Opera opera = suggerimento.getSuggerimento();
                 int prevInt = suggerimentiPerOpera.get(opera);
                 suggerimentiPerOpera.put(opera, ++prevInt);
+                countSuggest++;
             }
-            bilancioMuseo = sm.getBilancioMuseo();
-
-            loadFactorSale = sm.getLoadFactorSale();
-
-            if (mostra != null)
+            if (bilancioMuseoState != null) {
+                bilancioMuseo = bilancioMuseoState;
+                needAdminOp = false;
+            }
+            if (loadFactor != null) {
+                loadFactorSale = loadFactor;
+                needAdminOp = false;
+            }
+            if (mostra != null) {
                 mostreChiuse.add(mostra);
-
-            semaphore = sm.getMostraAggiunta();
+                checkForLockToBeReleased();
+                needAdminOp = true;
+            }
+            if (museoIsReady != null) {
+                checkForLockToBeReleased();
+                needAdminOp = true;
+            }
+            bilancioMuseo = museo.getBilancio(this);
         }
-        checkNumSuggerimenti();
-        setStrategy();
-        if(strategy instanceof KillMostreStrategy || strategy instanceof NoCreationStrategy)
+        else if (o == null && arg == null) {
+            strongRestart = true;
+        }else{
+            bilancioMuseo = museo.getBilancio(this);
+            loadFactorSale = museo.getLoadFactorSale(this);
+            needAdminOp = true;
+        }
+        // CHECK SUGGERIMENTI
+        if (countSuggest > 9) {
+            checkNumSuggerimenti();
+            countSuggest = 0;
+        }
+        if(strongRestart){
+            updateSemaforo();
+            setStrategy();
             azioneAmministratore();
-        else
-        {
-            if(goAutomatico && semaphore) {
-                azioneAmministratore();
+        }
+        else {
+
+            // AMMINISTRATORE AUTOMATICO
+            updateSemaforo();
+
+            // se ho il semaforo false (cioè Giallo o Rosso), allora calcolo la strategia, e se la
+            // strategia è kill verifico che non stia già uccidendo qualche altra mostra.
+            if (goAutomatico && needAdminOp) {
+                if (!semaphoreForCreationalStrategies) {
+                    setStrategy();
+                    boolean killerIsReady = ((KillMostreStrategy) killMostreStrategy).isReady();
+                    if (strategy instanceof KillMostreStrategy && !killerIsReady) {
+                        ;
+                    } else
+                        azioneAmministratore();
+
+                } else {
+                    if (!lockCreationIncaricoMostre) {
+                        setStrategy();
+                        azioneAmministratore();
+                    }
+                }
+            }
+
+            // PULIZIA STRUTTURE DATI
+            rotations++;
+            if (rotations == 100) {
+                removeTrash();
+                rotations = 0;
             }
         }
+    }
+
+    private void removeTrash(){
+        for(IncaricoMostra incaricoMostra : incarichiCreati)
+            if(!incaricoMostra.isKillable())
+                incarichiCreati.remove(incaricoMostra);
+    }
+
+    /**
+     * Conto le mostre che ho nel museo, e conto quelle che dovrebbero essere attive. Se questi due non corrispondono
+     * è probabile che l'Update è stato chiamato da un Museo in fase di modifica.
+     */
+    private void checkForLockToBeReleased(){
+        int expectedMostreVive = 0;
+        int expectedMostreMorte = 0;
+        for(IncaricoMostra incaricoMostra : incarichiCreati){
+            if(incaricoMostra.isKillable())
+                expectedMostreVive++;
+            else
+                expectedMostreMorte++;
+        }
+        if(museo.getMostre().size() == expectedMostreVive && mostreChiuse.size() == expectedMostreMorte) {
+            lockCreationIncaricoMostre = false;
+            ((KillMostreStrategy)killMostreStrategy).setReady();
+        }
+    }
+
+    /**
+     * Il semaforo rosso (false) mette in pausa l'amministratore. Con il semaforo rosso, l'Amministratore
+     * può solamente killare o stare in idle.
+     */
+    private void updateSemaforo(){
+        int incarichiAttivi = museo.getMostre().size();
+
+        if(incarichiAttivi < 2 && loadFactorSale < 0.65) // semaforo verde
+            semaphoreForCreationalStrategies = true;
+        else
+            semaphoreForCreationalStrategies = false;
     }
 
     /**
@@ -92,7 +213,7 @@ public class Amministratore implements Observer {
      */
     public void loadSuggerimentiPerOpera(Object requester){
         if(requester instanceof TestStrategyIncaricoMostra || requester instanceof Amministratore)
-        suggerimentiPerOpera = new LinkedHashMap<>();
+            suggerimentiPerOpera = new LinkedHashMap<>();
         for(Opera o: museo.getCatalogoOpere())
             suggerimentiPerOpera.put(o,0);
     }
@@ -103,22 +224,26 @@ public class Amministratore implements Observer {
      * del museo.
      */
     private void setStrategy(){
-        if (loadFactorSale > 0.9)
-            strategy = new KillMostreStrategy(incarichiCreati, this);
-        else if (0.5 < loadFactorSale && loadFactorSale <=0.9){
-            strategy = new NoCreationStrategy();
-        }else {
-            if(accumuloRichieste.size() >= 2 && bilancioMuseo >= 1000) {
+        if(!semaphoreForCreationalStrategies){ // semaforo ROSSO
+            if (loadFactorSale > 0.9)
+                strategy = killMostreStrategy;
+            else    // semaforo GIALLO
+                strategy = idleStrategy;
+        } else {    // semaforo VERDE
+            // Se il semaforo è verde sono sicuro che ho al massimo 2 mostre attive. Imposto strategia di creazione
+            if (accumuloRichieste.size() >= 2 && bilancioMuseo >= 400) {
                 strategy = new OnSuggestStrategy(accumuloRichieste, this);
             } else {
-                if (bilancioMuseo == 0)
-                    strategy = new NoCreationStrategy();
-                if (0 < bilancioMuseo && bilancioMuseo <= 1000)
+                if (bilancioMuseo < 1000)
+                    strategy = idleStrategy;
+                else if (1000 <= bilancioMuseo && bilancioMuseo < 2500)
                     strategy = new LowBudgetStrategy();
-                if (1000 < bilancioMuseo && bilancioMuseo < 5000)
+                else if (2500 <= bilancioMuseo && bilancioMuseo < 5000)
                     strategy = new PersonalStrategy(5, true);
-                if (5000 < bilancioMuseo && bilancioMuseo < 10000)
+                else if (5000 <= bilancioMuseo && bilancioMuseo < 10000)
                     strategy = new PersonalStrategy(7, false);
+                else
+                    strategy = idleStrategy;
             }
         }
     }
@@ -146,16 +271,13 @@ public class Amministratore implements Observer {
      * d'arte che possono essere noleggiate e che servono per la Mostra
      * || Se invece è impostata come Strategy quella di chiudere le mostre,
      * chiude la mostra secondo quella Strategia. In qualsiasi caso, è lo strategyMethod che sa la procedura.
-     * // TODO: ancora non si prevede di poter trovare un Organizzatore occupato.
      * @return : Ai soli fini di test. Non è necessario prendere il valore di ritorno per avere questo comportamento
      */
     public IncaricoMostra azioneAmministratore(){
         IncaricoMostra incaricoMostra = strategy.strategyMethod(museo);
-        if(incaricoMostra != null) {
-            semaphore = false;
-            // Se passo in questo if, ho creato un IncaricoMostra e quindi la organizzo
+        if(incaricoMostra != null && !lockCreationIncaricoMostre) {
+            lockCreationIncaricoMostre = true;
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
-            museo.prelevaBilancio(this, incaricoMostra.getBilancio());
             incaricoMostra.setOrganizzatore(organizzatore);
             incarichiCreati.add(incaricoMostra);
             organizzatore.setIncaricoAttuale(incaricoMostra);
@@ -196,8 +318,8 @@ public class Amministratore implements Observer {
         }
         IncaricoMostra incaricoMostra = strategy.strategyMethod(museo);
         if(incaricoMostra != null) {
+
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
-            museo.prelevaBilancio(this, incaricoMostra.getBilancio());
             incaricoMostra.setOrganizzatore(organizzatore);
             incarichiCreati.add(incaricoMostra);
             organizzatore.setIncaricoAttuale(incaricoMostra);
@@ -219,14 +341,13 @@ public class Amministratore implements Observer {
         }else if(numeroStrategia == 1){ // Num 1 = strategia Lowbudget
             strategy = new LowBudgetStrategy();
         }else if(numeroStrategia == 2){ // Num 2 = strategia Highbudget
-            strategy = new PersonalStrategy(numeroOpere, false);
+            strategy = new PersonalStrategy(numeroOpere, ancheVirtuale);
         }else if(numeroStrategia == 3){ // Num 3 = strategia suggerimento
             strategy = new OnSuggestStrategy(accumuloRichieste, this);
         }
         IncaricoMostra incaricoMostra = strategy.strategyMethod(museo);
         if(incaricoMostra != null) {
             Organizzatore organizzatore = (Organizzatore) museo.getOrganizzatori(true).get(0);
-            museo.prelevaBilancio(this, incaricoMostra.getBilancio());
             incaricoMostra.setOrganizzatore(organizzatore);
             incarichiCreati.add(incaricoMostra);
             organizzatore.setIncaricoAttuale(incaricoMostra);
