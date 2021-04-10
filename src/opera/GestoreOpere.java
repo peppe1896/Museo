@@ -1,7 +1,7 @@
 package opera;
 
-import museo.strutturaMuseo.Museo;
-import museo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museo.Museo;
+import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
 
 import java.util.Set;
 

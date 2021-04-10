@@ -1,11 +1,14 @@
 package test.testProcedurali;
 
-import museo.strutturaMuseo.Museo;
+import strutturaMuseo.museo.Mostra;
+import strutturaMuseo.museo.Museo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import museo.personaleMuseo.amministratore.Amministratore;
+import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
+import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import visitatore.Visitatore;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,8 +41,45 @@ public class TestObserver {
     }
 
     @Test
-    @DisplayName("Test più musei")
-    public void test() {
-    }
+    @DisplayName("Test Create-Sell-Destroy-Create-Sell-Destroy")
+    public void testFinal(){
+        museo.addBilancio(amministratore, 5000);
+        System.out.println("Mi aspetto di vedere 2 mostre.");
+        assertEquals(2, museo.getMostre().size());
+        Mostra m = museo.getMostre().iterator().next();
+        System.out.println("Posti pre acquisto: "+ m.getPostiRimasti());
+        int postiPre = m.getPostiRimasti();
+        Visitatore[] visitors = new Visitatore[500];
+        for(int j = 0;j<visitors.length;j++)
+            visitors[j] = new Visitatore(1000);
+        try {
+            for (int i = 0;i < 6;i++){
+                museo.vendiTicketMostraFisica(visitors[i], m);
+                Thread.sleep(50);
+            }
+            System.out.println("Posti dopo l'acquisto: "+m.getPostiRimasti());
+            assertTrue(postiPre != m.getPostiRimasti());
+            Thread.sleep(2000);
+            System.out.println("Aggiungo una mostra di tante opere d'arte, che sovraccarica le Sale.");
+            System.out.println("Mi aspetto che l'amministratore chiuda la più vecchia delle mostre.");
+            IncaricoMostra incaMo = amministratore.forceStrategyExecution(2, 20, true);
+            System.out.println("Se qui è true vuol dire che è terminata: "+ m.isTerminata());
+            assertTrue(m.isTerminata());
+            m = museo.getMostre().iterator().next();
+            System.out.println("m è una mostra virtuale? "+m.isVirtual());
+            for(int i = 0;i<visitors.length;i++)
+                museo.registraVisitatore(visitors[i]);
+            System.out.println("Aggiungo tanti visitatori a quella mostra. In questo modo verrà chiusa.");
+            for(int j=0;j<visitors.length;j++)
+                museo.vendiTicketMostraVirtuale(visitors[j],m, false);
+            System.out.println("Questa seconda mostra è attiva? "+ !m.isTerminata());
+            assertTrue(m.isTerminata());
+            m = incaMo.getMostra();
+            for(int i=0;i<visitors.length;i++)
+                museo.vendiTicketMostraVirtuale(visitors[i], m, true);
+            System.out.println("Questa ultima mostra è ancora attiva? "+ !m.isTerminata());
+            assertTrue(m.isTerminata());
 
+        }catch (InterruptedException e){}
+    }
 }

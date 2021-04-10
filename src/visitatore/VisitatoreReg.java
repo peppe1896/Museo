@@ -1,6 +1,6 @@
 package visitatore;
 
-import museo.ticket.TicketMuseo;
+import strutturaMuseo.museo.Ticket;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ public class VisitatoreReg extends Visitatore implements Acquirente {
     private String username = "username";
     private boolean firstSet = true;
     private int bilancio = 0;
-    private ArrayList<TicketMuseo> ticketsAcquistati = new ArrayList<>();
+    private ArrayList<Ticket> ticketsAcquistati = new ArrayList<>();
 
     public VisitatoreReg(int bilancio) {
         super(bilancio);
@@ -22,8 +22,8 @@ public class VisitatoreReg extends Visitatore implements Acquirente {
         return false;
     }
 */
-    public void addTicket(TicketMuseo ticketMuseo){
-        this.ticketsAcquistati.add(ticketMuseo);
+    public void addTicket(Ticket ticket){
+        this.ticketsAcquistati.add(ticket);
     }
 
 

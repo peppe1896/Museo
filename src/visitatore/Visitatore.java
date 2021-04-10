@@ -1,14 +1,14 @@
 package visitatore;
 
-import museo.Suggeritore;
-import museo.ticket.TicketMuseo;
-import museo.personaleMuseo.NoMoneyException;
+import strutturaMuseo.Suggeritore;
+import strutturaMuseo.museo.Ticket;
+import strutturaMuseo.personaleMuseo.NoMoneyException;
 
 import java.util.ArrayList;
 
 public class Visitatore implements Suggeritore, Acquirente {
     private int bilancio = 0;
-    private ArrayList<TicketMuseo> ticketsAcquistati = new ArrayList<>();
+    private ArrayList<Ticket> ticketsAcquistati = new ArrayList<>();
 
     public Visitatore(int bilancio){
         this.bilancio = bilancio;
@@ -35,8 +35,8 @@ public class Visitatore implements Suggeritore, Acquirente {
         this.bilancio = bilancio;
     }
 
-    public void addTicket(TicketMuseo ticketMuseo){
-        this.ticketsAcquistati.add(ticketMuseo);
+    public void addTicket(Ticket ticket){
+        this.ticketsAcquistati.add(ticket);
     }
 
     public void ottieniRimborso(int rimborso){

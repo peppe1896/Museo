@@ -1,11 +1,11 @@
 package test.testFunzionali;
 
-import museo.strutturaMuseo.Museo;
-import museo.strutturaMuseo.Suggerimento;
+import strutturaMuseo.museo.Museo;
+import strutturaMuseo.museo.Suggerimento;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import museo.personaleMuseo.amministratore.Amministratore;
+import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
 import visitatore.Visitatore;
 
 import java.util.LinkedHashMap;
@@ -63,16 +63,8 @@ public class TestSuggerimento {
     @DisplayName("Test Update Amministratore")
     public void testUpdateAmministratore() {
         LinkedHashMap<Opera, Integer> hashMapAmministratore = amministratore.getSuggerimentiPerOpera();
-        /*
-        Mi assicuro che non ci sia il suggerimento prima di aggiungerlo tramite il metodo
-        registraSuggerimento() di Museo. Visto che è stato appena inizializzato, ho 0 in tutte le
-        i Values della LinkedHashMap dell'amministratore
-        */
         assertTrue(hashMapAmministratore.get(suggerimento.getSuggerimento()) == 0);
         museo.registraSuggerimento(suggerimento);
-        /*
-        Dopo che chiamo questo metodo mi aspetto che l'amministratore sia a conoscenza di questo suggerimento
-         */
         assertTrue(hashMapAmministratore.get(suggerimento.getSuggerimento()) == 1);
     }
 }
