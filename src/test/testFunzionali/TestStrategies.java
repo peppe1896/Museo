@@ -68,7 +68,7 @@ public class TestStrategies {
      */
     @Test
     @DisplayName("Test strategy bilancio sostanzioso")
-    public void testStrategyHighBal(){
+    public void testStrategyPersonal(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore,3000);
         IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(2,5,true);
@@ -88,7 +88,7 @@ public class TestStrategies {
      */
     @Test
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
-    public void testStrategyAuto(){
+    public void testStrategySuggerimenti(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(amministratore, 500);
         Visitatore v = new Visitatore(100);
@@ -110,7 +110,7 @@ public class TestStrategies {
     @Test
     @DisplayName("Test della strategy che annulla una Mostra in corso di realizzazione o di svolgimento")
     public void testKillStrategy(){
-        testStrategyAuto();
+        testStrategySuggerimenti();
         Mostra m = incaricoMostra.getMostra();
         assertFalse(m.isTerminata());
         amministratore.forceStrategyExecution(0);

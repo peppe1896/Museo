@@ -41,7 +41,7 @@ public class TestObserver {
     }
 
     @Test
-    @DisplayName("Test Create-Sell-Destroy-Create-Sell-Destroy")
+    @DisplayName("Test Create-Sell-Destroy-Repeat")
     public void testFinal(){
         museo.addBilancio(amministratore, 5000);
         System.out.println("Mi aspetto di vedere 2 mostre.");
@@ -65,6 +65,7 @@ public class TestObserver {
             IncaricoMostra incaMo = amministratore.forceStrategyExecution(2, 20, true);
             System.out.println("Se qui è true vuol dire che è terminata: "+ m.isTerminata());
             assertTrue(m.isTerminata());
+            assertEquals(2, museo.getMostre().size());
             m = museo.getMostre().iterator().next();
             System.out.println("m è una mostra virtuale? "+m.isVirtual());
             for(int i = 0;i<visitors.length;i++)
@@ -72,6 +73,7 @@ public class TestObserver {
             System.out.println("Aggiungo tanti visitatori a quella mostra. In questo modo verrà chiusa.");
             for(int j=0;j<visitors.length;j++)
                 museo.vendiTicketMostraVirtuale(visitors[j],m, false);
+            assertEquals(2, museo.getMostre().size());
             System.out.println("Questa seconda mostra è attiva? "+ !m.isTerminata());
             assertTrue(m.isTerminata());
             m = incaMo.getMostra();
@@ -79,7 +81,7 @@ public class TestObserver {
                 museo.vendiTicketMostraVirtuale(visitors[i], m, true);
             System.out.println("Questa ultima mostra è ancora attiva? "+ !m.isTerminata());
             assertTrue(m.isTerminata());
-
+            assertEquals(2, museo.getMostre().size());
         }catch (InterruptedException e){}
     }
 }

@@ -51,11 +51,7 @@ public class TestVenditaBigliettiETicket {
     @Test
     @DisplayName("Test with Budget")
     public void testVendiBigliettoBudget(){
-        try {
-            assertTrue(museo.vendiBigliettoMuseo(new Visitatore(100)));
-        }catch (NoMoneyException e){
-            assertFalse(true);
-        }
+        assertTrue(museo.vendiBigliettoMuseo(new Visitatore(100)));
     }
 
     /**

@@ -23,8 +23,6 @@ public class TestOrganizzaMostra {
      * L'incarico assegnato a un organizzatore è appunto organizzare una mostra. Quindi chiamando il metodo
      * svolgiIncarico mi aspetto di trovare una Mostra nel Museo. Questo è chiamato in forward dal metodo
      * forceStrategyExecution.
-     *
-     * Ci sono due Mostre, una create appena impostato il bilancio a 1500 e una seconda quando forza la strategy.
      */
     @Test
     @DisplayName("Test creazione una Mostra")
