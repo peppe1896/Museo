@@ -89,6 +89,42 @@ public class Museo extends Observable {
                 new SalaFisica(5),
                 new SalaVirtuale(15),
                 new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaFisica(5),
+                new SalaVirtuale(15),
+                new SalaVirtuale(15),
+                new SalaVirtuale(15),
+                new SalaVirtuale(15),
+                new SalaVirtuale(15),
                 new SalaVirtuale(15)
         );
     }
@@ -309,13 +345,13 @@ public class Museo extends Observable {
 
     /**
      * Fornisce una Lista di Sale libere che contiene solamente SaleFisiche o SaleFisiche e SaleVirtuali.
-     * @param ancheVirtuali se true: tra le Sale prende anche quelle SaleVirtuali | se false, prende solo
+     * @param virtuali se true: tra le Sale prende anche quelle SaleVirtuali | se false, prende solo
      *                      SaleFisiche.
      * @return Lista di Sale.
      */
-    public List<Sala> getSale(boolean ancheVirtuali){
+    public List<Sala> getSale(boolean virtuali){
         List<Sala> sale = new ArrayList<>();
-        if(!ancheVirtuali) {
+        if(!virtuali) {
             for (Sala sala : this.sale)
                 if (sala instanceof SalaFisica)
                     if (!sala.isBusy())
@@ -323,8 +359,9 @@ public class Museo extends Observable {
         }
         else{
             for(Sala sala: this.sale)
-                if(!sala.isBusy())
-                    sale.add(sala);
+                if(sala instanceof SalaVirtuale)
+                    if(!sala.isBusy())
+                        sale.add(sala);
         }
         return sale;
     }

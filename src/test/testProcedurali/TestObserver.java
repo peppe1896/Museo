@@ -49,7 +49,7 @@ public class TestObserver {
         Mostra m = museo.getMostre().iterator().next();
         System.out.println("Posti pre acquisto: "+ m.getPostiRimasti());
         int postiPre = m.getPostiRimasti();
-        Visitatore[] visitors = new Visitatore[500];
+        Visitatore[] visitors = new Visitatore[800];
         for(int j = 0;j<visitors.length;j++)
             visitors[j] = new Visitatore(1000);
         try {
@@ -73,6 +73,7 @@ public class TestObserver {
             System.out.println("Aggiungo tanti visitatori a quella mostra. In questo modo verrà chiusa.");
             for(int j=0;j<visitors.length;j++)
                 museo.vendiTicketMostraVirtuale(visitors[j],m, false);
+            assertEquals(2, museo.getMostre().size());
             assertEquals(2, museo.getMostre().size());
             System.out.println("Questa seconda mostra è attiva? "+ !m.isTerminata());
             assertTrue(m.isTerminata());

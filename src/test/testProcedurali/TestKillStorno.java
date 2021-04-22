@@ -33,7 +33,7 @@ public class TestKillStorno {
      */
     @Test
     @DisplayName("Test kill di mostre aperte")
-    public void testKillMostreAperteHihPayload(){
+    public void testKillMostreAperteHihLoadFactor(){
         amministratore.setAmministratoreAutomatico(false);
         museo.setBilancio(6000);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);

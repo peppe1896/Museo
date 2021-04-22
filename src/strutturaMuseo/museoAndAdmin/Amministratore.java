@@ -127,14 +127,14 @@ public class Amministratore implements Observer {
             countSuggest = 0;
         }
         if(strongRestart){
-            updateSemaforo();
+            updateSemaphore();
             setStrategy();
             azioneAmministratore();
         }
         else {
 
             // AMMINISTRATORE AUTOMATICO
-            updateSemaforo();
+            updateSemaphore();
 
             // se ho il semaforo false (cioè Giallo o Rosso), allora calcolo la strategia, e se la
             // strategia è kill verifico che non stia già uccidendo qualche altra mostra.
@@ -193,7 +193,7 @@ public class Amministratore implements Observer {
      * Il semaforo rosso (false) mette in pausa l'amministratore. Con il semaforo rosso, l'Amministratore
      * può solamente killare o stare in idle.
      */
-    private void updateSemaforo(){
+    private void updateSemaphore(){
         int incarichiAttivi = museo.getMostre().size();
 
         if(incarichiAttivi < 2 && loadFactorSale < 0.65) // semaforo verde

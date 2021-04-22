@@ -53,7 +53,7 @@ public class Organizzatore extends Personale implements Observer {
         assegnaCompiti(ancheVirtuale);
         pagaPersonale();
         try {
-            affittaOpere();
+            verificaOpere();
         } catch (Exception e){System.err.println(e.getMessage());}
         setMostra(ancheVirtuale);
         svolgiCompitiImpiegati();
@@ -85,7 +85,7 @@ public class Organizzatore extends Personale implements Observer {
     /**
      * Affitta le opere pagando il prezzo di noleggio
      */
-    private void affittaOpere() throws Exception{
+    private void verificaOpere() throws Exception{
         for(Opera opera:incaricoAttuale.getOpereMostra())
             if(!opera.isBusy())
                 if(opera.getAffittuario()!=museo)
@@ -159,15 +159,43 @@ public class Organizzatore extends Personale implements Observer {
      */
     private void setDetailMostra(boolean ancheVirtuale){
         Mostra mostra = incaricoAttuale.getMostra();
+        Iterator<Sala> iterVirtuali = null;
+
         List<Sala> saleFisiche = museo.getSale(false);
-        int saleFisicheMuseo = museo.getSale(false).size();
-        List<Sala> saleMuseo = museo.getSale(ancheVirtuale);
+        Iterator<Sala> iterFisiche = saleFisiche.iterator();
+
+        if(ancheVirtuale) {
+            List<Sala> saleVirtuali = museo.getSale(true);
+            iterVirtuali = saleVirtuali.iterator();
+        }
+
         Set<Sala> saleMostra = new HashSet<>();
-        Iterator<Sala> iterator = saleMuseo.iterator();
-        int i = 0;
-        while(iterator.hasNext() && i < incaricoAttuale.getOpereMostra().size()){
-            i++;
-            saleMostra.add(iterator.next());
+        List<Opera> opereDaRestituire = new ArrayList<>();
+        Iterator<Opera> iterOpere = incaricoAttuale.getOpereMostra().iterator();
+        while(iterOpere.hasNext()){
+            Opera o = iterOpere.next();
+            if(iterFisiche.hasNext()){
+                Sala s = iterFisiche.next();
+                s.inserisciOpera(o);
+                saleMostra.add(s);
+                if(ancheVirtuale) {
+                    if(iterVirtuali.hasNext()) {
+                        Sala sv = iterVirtuali.next();
+                        sv.associaSalaFisica(s);
+                        saleMostra.add(sv);
+                    }
+                }
+            }
+            else{
+                System.err.println("Non ci sono abbastanza sale libere per tutte le opere. Le opere non" +
+                        "allocate verranno restituite");
+                opereDaRestituire.add(o);
+            }
+        }
+        GestoreOpere go = museo.getGestoreOpere();
+        for(Opera o: opereDaRestituire) {
+            go.restituisciOperaAffittata(o);
+            incaricoAttuale.getOpereMostra().remove(o);
         }
         int count = 0;
         for(Sala s:saleMostra) {
@@ -207,8 +235,11 @@ public class Organizzatore extends Personale implements Observer {
         }
 
         Set<Sala> saleMostra = mostra.getSale();
-        for(Sala sala: saleMostra)
+        for(Sala sala: saleMostra) {
             sala.freeSala();
+            sala.dissociaSalaFisica();
+            sala.rimuoviOpera();
+        }
         this.setFree();
         mostra.setTerminata();
         mostra.deleteObserver(this);
