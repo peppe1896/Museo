@@ -1,4 +1,4 @@
-package strutturaMuseo.personaleMuseo.personaleEsecutivo.incarichiMostra;
+package strutturaMuseo.personaleMuseo.personaleEsecutivo.organizzatore;
 
 import strutturaMuseo.museo.Mostra;
 import strutturaMuseo.museo.Museo;

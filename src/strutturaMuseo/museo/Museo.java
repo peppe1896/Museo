@@ -6,7 +6,7 @@ import strutturaMuseo.personaleMuseo.*;
 import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
 import strutturaMuseo.personaleMuseo.amministratore.Strategy;
 import strutturaMuseo.personaleMuseo.personaleEsecutivo.Impiegato;
-import strutturaMuseo.personaleMuseo.personaleEsecutivo.incarichiMostra.Organizzatore;
+import strutturaMuseo.personaleMuseo.personaleEsecutivo.organizzatore.Organizzatore;
 import strutturaMuseo.personaleMuseo.personaleEsecutivo.Personale;
 import visitatore.Acquirente;
 import visitatore.Visitatore;

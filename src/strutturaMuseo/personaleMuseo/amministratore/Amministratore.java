@@ -6,7 +6,7 @@ import strutturaMuseo.museo.Museo;
 import strutturaMuseo.museo.StatoMuseo;
 import strutturaMuseo.museo.Suggerimento;
 import opera.Opera;
-import strutturaMuseo.personaleMuseo.personaleEsecutivo.incarichiMostra.Organizzatore;
+import strutturaMuseo.personaleMuseo.personaleEsecutivo.organizzatore.Organizzatore;
 import test.testFunzionali.TestStrategies;
 
 import java.util.*;

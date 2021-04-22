@@ -1,7 +1,7 @@
 package strutturaMuseo.museo;
 
 import opera.Opera;
-import strutturaMuseo.personaleMuseo.personaleEsecutivo.incarichiMostra.Organizzatore;
+import strutturaMuseo.personaleMuseo.personaleEsecutivo.organizzatore.Organizzatore;
 import visitatore.Acquirente;
 
 import java.util.*;

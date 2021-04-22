@@ -5,7 +5,7 @@ import opera.GestoreOpere;
 import opera.Opera;
 import strutturaMuseo.personaleMuseo.*;
 import strutturaMuseo.personaleMuseo.Incarico;
-import strutturaMuseo.personaleMuseo.personaleEsecutivo.incarichiMostra.Organizzatore;
+import strutturaMuseo.personaleMuseo.personaleEsecutivo.organizzatore.Organizzatore;
 import strutturaMuseo.personaleMuseo.personaleEsecutivo.Personale;
 
 import java.util.ArrayList;
