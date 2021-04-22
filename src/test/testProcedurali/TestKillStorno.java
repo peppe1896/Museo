@@ -1,11 +1,11 @@
 package test.testProcedurali;
 
-import strutturaMuseo.museo.Mostra;
-import strutturaMuseo.museo.Museo;
+import strutturaMuseo.organizzazione.organizzatore.Mostra;
+import strutturaMuseo.museoAndAdmin.Museo;
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
-import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museoAndAdmin.Amministratore;
+import strutturaMuseo.museoAndAdmin.IncaricoMostra;
 import visitatore.Visitatore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +35,7 @@ public class TestKillStorno {
     @DisplayName("Test kill di mostre aperte")
     public void testKillMostreAperteHihPayload(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 6000);
+        museo.setBilancio(6000);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
@@ -59,7 +59,7 @@ public class TestKillStorno {
     @DisplayName("Test kill di Mostre aperte con visitatori")
     public void testKillMostreStornoDenaro(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 6000);
+        museo.setBilancio(6000);
         incaricoMostra1 = amministratore.forceStrategyExecution(2, 20, true);
         incaricoMostra = amministratore.forceStrategyExecution(2, 20, true);
         assertTrue(amministratore.getLoadFactorSale() > 0.9);

@@ -1,14 +1,14 @@
 package test.testFunzionali;
 
 
-import strutturaMuseo.museo.Mostra;
-import strutturaMuseo.museo.Museo;
-import strutturaMuseo.museo.Suggerimento;
+import strutturaMuseo.organizzazione.organizzatore.Mostra;
+import strutturaMuseo.museoAndAdmin.Museo;
+import strutturaMuseo.museoAndAdmin.Suggerimento;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
-import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museoAndAdmin.Amministratore;
+import strutturaMuseo.museoAndAdmin.IncaricoMostra;
 import visitatore.Visitatore;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class TestStrategies {
     @Test
     @DisplayName("Test strategy bilancio zero")
     public void testStrategyNoMoves(){
-        museo.setBilancio(amministratore, 0);
+        museo.setBilancio(0);
         IncaricoMostra incaricoMostra = amministratore.azioneAmministratore();
         assertNull(incaricoMostra);
     }
@@ -51,7 +51,7 @@ public class TestStrategies {
     @DisplayName("Test strategy bilancio basso")
     public void testStrategyLowBal(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 600);
+        museo.setBilancio(600);
         IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(1);
         assertNotNull(incaricoMostra);
         List<Opera> opereMostra = incaricoMostra.getOpereMostra();
@@ -70,7 +70,7 @@ public class TestStrategies {
     @DisplayName("Test strategy bilancio sostanzioso")
     public void testStrategyPersonal(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore,3000);
+        museo.setBilancio(3000);
         IncaricoMostra incaricoMostra = amministratore.forceStrategyExecution(2,5,true);
         List<Opera> opere = incaricoMostra.getOpereMostra();
         int count = 0;
@@ -90,7 +90,7 @@ public class TestStrategies {
     @DisplayName("Test strategy automatica con alto numero di suggerimenti")
     public void testStrategySuggerimenti(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 500);
+        museo.setBilancio(500);
         Visitatore v = new Visitatore(100);
         Opera opera1 = gestoreOpere.getOperaNome("TestY");
         Opera opera2 = gestoreOpere.getOperaNome("TestZ");

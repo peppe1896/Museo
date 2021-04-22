@@ -1,13 +1,13 @@
 package test.testProcedurali;
 
-import strutturaMuseo.museo.Mostra;
-import strutturaMuseo.museo.Museo;
+import strutturaMuseo.organizzazione.organizzatore.Mostra;
+import strutturaMuseo.museoAndAdmin.Museo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
-import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museoAndAdmin.Amministratore;
+import strutturaMuseo.museoAndAdmin.IncaricoMostra;
 import visitatore.Visitatore;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +35,7 @@ public class TestObserver {
     @Test
     @DisplayName("Test numero Mostre con bilancio alto")
     public void testMinNumMostre() throws Exception {
-        museo.addBilancio(amministratore, 3000);
+        museo.addBilancio(3000);
         numeroMostreCreate = museo.getMostre().size();
         assertTrue(numeroMostreCreate != 0);
     }
@@ -43,7 +43,7 @@ public class TestObserver {
     @Test
     @DisplayName("Test Create-Sell-Destroy-Repeat")
     public void testFinal(){
-        museo.addBilancio(amministratore, 5000);
+        museo.addBilancio(5000);
         System.out.println("Mi aspetto di vedere 2 mostre.");
         assertEquals(2, museo.getMostre().size());
         Mostra m = museo.getMostre().iterator().next();
@@ -55,11 +55,11 @@ public class TestObserver {
         try {
             for (int i = 0;i < 6;i++){
                 museo.vendiTicketMostraFisica(visitors[i], m);
-                Thread.sleep(50);
+                Thread.sleep(5);
             }
             System.out.println("Posti dopo l'acquisto: "+m.getPostiRimasti());
             assertTrue(postiPre != m.getPostiRimasti());
-            Thread.sleep(2000);
+            Thread.sleep(100);
             System.out.println("Aggiungo una mostra di tante opere d'arte, che sovraccarica le Sale.");
             System.out.println("Mi aspetto che l'amministratore chiuda la più vecchia delle mostre.");
             IncaricoMostra incaMo = amministratore.forceStrategyExecution(2, 20, true);

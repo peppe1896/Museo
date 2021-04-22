@@ -1,7 +1,7 @@
 package visitatore;
 
-import strutturaMuseo.museo.Ticket;
-import strutturaMuseo.personaleMuseo.NoMoneyException;
+import strutturaMuseo.museoAndAdmin.Ticket;
+import strutturaMuseo.NoMoneyException;
 
 /**
  * E' l'interfaccia che preve i metodi paga, addTicket, ottieniRimborso, getBilancio e accomuna tutte quelle

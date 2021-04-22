@@ -1,11 +1,11 @@
 package test.testFunzionali;
 
-import strutturaMuseo.museo.Museo;
+import strutturaMuseo.museoAndAdmin.Museo;
 import opera.GestoreOpere;
 import opera.Opera;
 import org.junit.jupiter.api.*;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
-import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museoAndAdmin.Amministratore;
+import strutturaMuseo.museoAndAdmin.IncaricoMostra;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,7 +41,7 @@ public class TestNoleggiaOpere {
     @DisplayName("Test verifica noleggio opere di un IncaricoMostra")
     public void testNoleggiaConSoldi(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 50000);
+        museo.setBilancio(50000);
         incaricoMostra = amministratore.forceStrategyExecution(2,14,false);
         for(Opera o: incaricoMostra.getOpereMostra())
             assertTrue(o.getAffittuario() == museo);
@@ -54,7 +54,7 @@ public class TestNoleggiaOpere {
     @DisplayName("Test noleggio senza soldi")
     public void testNoleggiaSenzaSoldi(){
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 50);
+        museo.setBilancio(50);
         int numeroOperePreviste = 5;
         incaricoMostra = amministratore.forceStrategyExecution(2,numeroOperePreviste,false);
         int count = 0;

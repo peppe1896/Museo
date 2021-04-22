@@ -1,9 +1,9 @@
 package test.testProcedurali;
 
-import strutturaMuseo.museo.Museo;
+import strutturaMuseo.museoAndAdmin.Museo;
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
+import strutturaMuseo.museoAndAdmin.Amministratore;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,7 +16,7 @@ public class TestOrganizzaMostra {
         museo = new Museo();
         amministratore = new Amministratore(museo);
         amministratore.setAmministratoreAutomatico(false);
-        museo.setBilancio(amministratore, 1500);
+        museo.setBilancio(1500);
     }
 
     /**

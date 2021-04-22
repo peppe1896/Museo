@@ -1,7 +1,7 @@
 package opera;
 
-import strutturaMuseo.museo.Museo;
-import strutturaMuseo.personaleMuseo.amministratore.IncaricoMostra;
+import strutturaMuseo.museoAndAdmin.Museo;
+import strutturaMuseo.museoAndAdmin.IncaricoMostra;
 
 import java.util.Set;
 
@@ -138,7 +138,7 @@ public final class GestoreOpere {
                     try {
                         incaricoRichiedente.prelevaDenaro(this, costoOperaDaAffittare);
                         operaDaAffittare.affitta(museoRichiedente);
-                        operaDaAffittare.getProprietario().addBilancio(this, operaDaAffittare.getCostoNoleggio());
+                        operaDaAffittare.getProprietario().addBilancio(operaDaAffittare.getCostoNoleggio());
                     } catch (NullPointerException e) {
                         System.err.println("Trovato proprietario null. I soldi per la transazione " +
                                 "dell'Opera sono andati perduti.");

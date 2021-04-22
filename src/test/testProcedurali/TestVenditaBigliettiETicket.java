@@ -1,12 +1,12 @@
 package test.testProcedurali;
 
-import strutturaMuseo.museo.Mostra;
-import strutturaMuseo.museo.Museo;
+import strutturaMuseo.organizzazione.organizzatore.Mostra;
+import strutturaMuseo.museoAndAdmin.Museo;
 
 import opera.GestoreOpere;
 import org.junit.jupiter.api.*;
-import strutturaMuseo.personaleMuseo.NoMoneyException;
-import strutturaMuseo.personaleMuseo.amministratore.Amministratore;
+import strutturaMuseo.NoMoneyException;
+import strutturaMuseo.museoAndAdmin.Amministratore;
 import visitatore.Visitatore;
 import visitatore.VisitatoreReg;
 
@@ -61,7 +61,7 @@ public class TestVenditaBigliettiETicket {
     @Test
     @DisplayName("Test Vendita ticket per mostra")
     public void testVenditaTicketFisici(){
-        museo.setBilancio(amministratore, 6000);
+        museo.setBilancio(6000);
         int oldBilancio = museo.getBilancio(amministratore);
         Visitatore[] visitatori = new Visitatore[60];
         for(int i=0;i< visitatori.length;i++){
@@ -90,7 +90,7 @@ public class TestVenditaBigliettiETicket {
     @Test
     @DisplayName("Test Vendita Ticket mostre miste, quindi su Sale fisiche e Virtuali")
     public void testSaleMiste(){
-        museo.setBilancio(amministratore, 6000);
+        museo.setBilancio(6000);
         Visitatore[] visitatori = new Visitatore[60];
         for(int i=0;i< visitatori.length;i++){
             visitatori[i] = new Visitatore(200);

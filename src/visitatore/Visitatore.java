@@ -1,8 +1,8 @@
 package visitatore;
 
 import strutturaMuseo.Suggeritore;
-import strutturaMuseo.museo.Ticket;
-import strutturaMuseo.personaleMuseo.NoMoneyException;
+import strutturaMuseo.museoAndAdmin.Ticket;
+import strutturaMuseo.NoMoneyException;
 
 import java.util.ArrayList;
 

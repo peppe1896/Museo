@@ -1,6 +1,6 @@
 package visitatore;
 
-import strutturaMuseo.museo.Ticket;
+import strutturaMuseo.museoAndAdmin.Ticket;
 
 import java.util.ArrayList;
 
